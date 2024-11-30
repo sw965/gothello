@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #board-container {
+        display: grid;
+        grid-template-columns: 30px repeat(8, 50px); /* 行番号を狭める */
+        grid-template-rows: 30px repeat(8, 50px);   /* 列番号とセル */
+        gap: 0; /* 完全に隙間をなくす */
+    }
+
+    .header-cell {
+        background-color: #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px; /* テキストサイズを調整 */
+    }
+
+    .cell {
+        background-color: green;
+        border: 1px solid black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cell.black::after {
+        content: '';
+        display: block;
+        width: 80%;
+        height: 80%;
+        background-color: black;
+        border-radius: 50%;
+    }
+
+    .cell.white::after {
+        content: '';
+        display: block;
+        width: 80%;
+        height: 80%;
+        background-color: white;
+        border-radius: 50%;
+    }
+
+    .cell.legal-action.black::after {
+        content: '';
+        display: block;
+        width: 30%;
+        height: 30%;
+        background-color: black;
+        border-radius: 50%;
+    }
+
+    .cell.legal-action.white::after {
+        content: '';
+        display: block;
+        width: 30%;
+        height: 30%;
+        background-color: white;
+        border-radius: 50%;
+    }
+
+    .cell.legal-action::after {
+        content: '';
+        display: block;
+        width: 30%;
+        height: 30%;
+        background-color: black;
+        border-radius: 50%;
+    }
+
+    #evaluation-bar-container {
+        width: 50%; /* 評価値バーの幅を50%に設定 */
+        height: 30px;
+        background-color: #ddd;
+        border: 1px solid #000;
+        position: relative;
+     }
+
+    #human-bar {
+        height: 100%;
+        background-color: #4CAF50;
+        position: absolute;
+        left: 0;
+    }
+
+    #ai-bar {
+        height: 100%;
+        background-color: blue;
+        position: absolute;
+        right: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="board-container"></div>
+  <script src="ui.js"></script>
+
+  <form>
+    <label>
+      <input type="radio" name="hand" value="あなたが先手" checked> あなたが先手
+    </label>
+        <label>
+        <input type="radio" name="hand" value="あなたが後手"> あなたが後手
+    </label>
+  </form>
+
+  <br>
+  <label for="simulations">1手毎のシミュレーション数</label>
+  <select id="simulations" name="simulations">
+      <option value="128">128</option>
+      <option value="512">512</option>
+      <option value="1280">1280</option>
+      <option value="1920">1920</option>
+      <option value="2560">2560</option>
+      <option value="5120">5120</option>
+      <option value="12800">12800</option>
+      <option value="19200">19200</option>
+  </select>
+
+  <br>
+  <br>
+  <button id="start-button" style="width: 120px; height: 35px; font-size: 18px;">対局開始</button>
+
+  <div id="evaluation-bar-container">
+    <div id="human-bar" style="width: 50%;"></div>
+    <div id="ai-bar" style="width: 50%;"></div>
+  </div>
+  <h3 id="human-score">人間: 50.0</h3>
+  <h3 id="ai-score">AI: 50.0</h3>
+</body>
+</html>
