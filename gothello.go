@@ -15,6 +15,51 @@ type Point struct {
 	Column int
 }
 
+// 時計回り90度回転したときの座標を返す。
+// 例: Point{Row:0, Column:0} -> {Row:0, Column:7}
+func (p Point) Rotate90() Point {
+	return Point{
+		Row:    p.Column,
+		Column: COLUMN - 1 - p.Row,
+	}
+}
+
+// 180度回転したときの座標を返す。
+// 例: Point{Row:0, Column:0} -> {Row:7, Column:7}
+func (p Point) Rotate180() Point {
+	return Point{
+		Row:    ROW - 1 - p.Row,
+		Column: COLUMN - 1 - p.Column,
+	}
+}
+
+// 時計回り270度回転したときの座標を返す。
+// 例: Point{Row:0, Column:0} -> {Row:7, Column:0}
+func (p Point) Rotate270() Point {
+	return Point{
+		Row:    ROW - 1 - p.Column,
+		Column: p.Row,
+	}
+}
+
+// 左右反転したときの座標を返す。
+// 例: Point{Row:0, Column:0} -> {Row:0, Column:7}
+func (p Point) MirrorHorizontal() Point {
+	return Point{
+		Row:    p.Row,
+		Column: COLUMN - 1 - p.Column,
+	}
+}
+
+// 上下反転したときの座標を返す。
+// 例: Point{Row:0, Column:0} -> {Row:7, Column:0}
+func (p Point) MirrorVertical() Point {
+	return Point{
+		Row:    ROW - 1 - p.Row,
+		Column: p.Column,
+	}
+}
+
 type Points []Point
 
 var ALL_POINTS = func() Points {
