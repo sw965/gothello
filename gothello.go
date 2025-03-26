@@ -33,6 +33,54 @@ func (b BitBoard) ToggleBit(p *Point) BitBoard {
 	return b ^ (1 << (p.Row * COLUMN + p.Column))
 }
 
+func (b BitBoard) Transpose() BitBoard {
+	var t BitBoard
+	t = (b ^ (b >> 7)) & 0b00000000_10101010_00000000_10101010_00000000_10101010_00000000_10101010
+	b = b ^ t ^ (t << 7)
+	t = (b ^ (b >> 14)) & 0b00000000_00000000_11001100_11001100_00000000_00000000_11001100_11001100
+	b = b ^ t ^ (t << 14)
+	t = (b ^ (b >> 28)) & 0b00000000_00000000_00000000_00000000_11110000_11110000_11110000_11110000
+	b = b ^ t ^ (t << 28)
+	return b
+}
+
+func (b BitBoard) MirrorHorizontal() BitBoard {
+	b = ((b & 0b11110000_11110000_11110000_11110000_11110000_11110000_11110000_11110000) >> 4) |
+		((b & 0b00001111_00001111_00001111_00001111_00001111_00001111_00001111_00001111) << 4)
+	b = ((b & 0b11001100_11001100_11001100_11001100_11001100_11001100_11001100_11001100) >> 2) |
+		((b & 0b00110011_00110011_00110011_00110011_00110011_00110011_00110011_00110011) << 2)
+	b = ((b & 0b10101010_10101010_10101010_10101010_10101010_10101010_10101010_10101010) >> 1) |
+		((b & 0b01010101_01010101_01010101_01010101_01010101_01010101_01010101_01010101) << 1)
+	return b
+}
+
+func (b BitBoard) MirrorVertical() BitBoard {
+	return ((b & 0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000) >> 56) |
+		((b & 0b00000000_11111111_00000000_00000000_00000000_00000000_00000000_00000000) >> 40) |
+		((b & 0b00000000_00000000_11111111_00000000_00000000_00000000_00000000_00000000) >> 24) |
+		((b & 0b00000000_00000000_00000000_11111111_00000000_00000000_00000000_00000000) >> 8) |
+		((b & 0b00000000_00000000_00000000_00000000_11111111_00000000_00000000_00000000) << 8) |
+		((b & 0b00000000_00000000_00000000_00000000_00000000_11111111_00000000_00000000) << 24) |
+		((b & 0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_00000000) << 40) |
+		((b & 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_11111111) << 56)
+}
+
+func (b BitBoard) Rotate90() BitBoard {
+	b = b.MirrorVertical()
+	b = b.Transpose()
+	return b
+}
+
+func (b BitBoard) Rotate180() BitBoard {
+	return BitBoard(bits.Reverse64(uint64(b)))
+}
+
+func (b BitBoard) Rotate270() BitBoard {
+	b = b.Transpose()
+	b = b.MirrorVertical()
+	return b
+}
+
 func (b BitBoard) ToPoints() Points {
 	count := bits.OnesCount64(uint64(b))
 	points := make(Points, 0, count)
@@ -416,12 +464,137 @@ func (s State) Put(move *Point) State {
 	return s
 }
 
+func (s *State) ToString() string {
+	blackArr := s.Black.ToArray()
+	whiteArr := s.White.ToArray()
+	legalArr := s.LegalPointBitBoard().ToArray()
+	str := ""
+
+	for row := 0; row < ROW; row++ {
+		for col := 0; col < COLUMN; col++ {
+			var mark string
+			if blackArr[row][col] == 1 {
+				mark = "b"
+			} else if whiteArr[row][col] == 1 {
+				mark = "w"
+			} else if legalArr[row][col] == 1 {
+				mark = "p"
+			} else {
+				mark = "-"
+			}
+
+			if col != COLUMN-1 {
+				mark += " "
+			}
+			str += mark
+		}
+		str += "\n"
+	}
+
+	if s.Hand == BLACK {
+		str += "hand = black\n"
+	} else {
+		str += "hand = white\n"
+	}
+	return str
+}
+
+func (s State) MirrorHorizontal() State {
+	s.Black = s.Black.MirrorHorizontal()
+	s.White = s.White.MirrorHorizontal()
+	return s
+}
+
+func (s State) MirrorVertical() State {
+	s.Black = s.Black.MirrorVertical()
+	s.White = s.White.MirrorVertical()
+	return s
+}
+
+func (s State) Rotate90() State {
+	s.Black = s.Black.Rotate90()
+	s.White = s.White.Rotate90()
+	return s
+}
+
+func (s State) Rotate180() State {
+	s.Black = s.Black.Rotate180()
+	s.White = s.White.Rotate180()
+	return s
+}
+
+func (s State) Rotate270() State {
+	s.Black = s.Black.Rotate270()
+	s.White = s.White.Rotate270()
+	return s
+}
+
 type ColorPairBitBoard struct {
 	Black BitBoard
 	White BitBoard
 }
 
+func (cp ColorPairBitBoard) MirrorHorizontal() ColorPairBitBoard {
+	cp.Black = cp.Black.MirrorHorizontal()
+	cp.White = cp.White.MirrorHorizontal()
+	return cp
+}
+
+func (cp ColorPairBitBoard) MirrorVertical() ColorPairBitBoard {
+	cp.Black = cp.Black.MirrorVertical()
+	cp.White = cp.White.MirrorVertical()
+	return cp
+}
+
+func (cp ColorPairBitBoard) Rotate90() ColorPairBitBoard {
+	cp.Black = cp.Black.Rotate90()
+	cp.White = cp.White.Rotate90()
+	return cp
+}
+
+func (cp ColorPairBitBoard) Rotate180() ColorPairBitBoard {
+	cp.Black = cp.Black.Rotate180()
+	cp.White = cp.White.Rotate180()
+	return cp
+}
+
+func (cp ColorPairBitBoard) Rotate270() ColorPairBitBoard {
+	cp.Black = cp.Black.Rotate270()
+	cp.White = cp.White.Rotate270()
+	return cp
+}
+
 type HandPairBitBoard struct {
 	Self     BitBoard
 	Opponent BitBoard
+}
+
+func (hp HandPairBitBoard) MirrorHorizontal() HandPairBitBoard {
+	hp.Self = hp.Self.MirrorHorizontal()
+	hp.Opponent = hp.Opponent.MirrorHorizontal()
+	return hp
+}
+
+func (hp HandPairBitBoard) MirrorVertical() HandPairBitBoard {
+	hp.Self = hp.Self.MirrorVertical()
+	hp.Opponent = hp.Opponent.MirrorVertical()
+	return hp
+}
+
+func (hp HandPairBitBoard) Rotate90() HandPairBitBoard {
+	hp.Self = hp.Self.Rotate90()
+	hp.Opponent = hp.Opponent.Rotate90()
+	return hp
+}
+
+func (hp HandPairBitBoard) Rotate180() HandPairBitBoard {
+	hp.Self = hp.Self.Rotate180()
+	hp.Opponent = hp.Opponent.Rotate180()
+	return hp
+}
+
+func (hp HandPairBitBoard) Rotate270() HandPairBitBoard {
+	hp.Self = hp.Self.Rotate270()
+	hp.Opponent = hp.Opponent.Rotate270()
+	return hp
 }

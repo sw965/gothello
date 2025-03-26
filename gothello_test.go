@@ -2,7 +2,7 @@ package gothello_test
 
 import (
 	"testing"
-	//"fmt"
+	"fmt"
 	"github.com/sw965/gothello"
 	"golang.org/x/exp/slices"
 )
@@ -57,4 +57,27 @@ func Test(t *testing.T) {
 	if !slices.Equal(legalPoints, expectedLegalPoints) {
 		t.Errorf("テスト失敗")
 	}
+}
+
+func TestRotate90(t *testing.T) {
+	state := gothello.NewInitState()
+	state.Black = state.Black.ToggleBit(&gothello.Point{Row:0, Column:0})
+	state.Black = state.Black.ToggleBit(&gothello.Point{Row:0, Column:1})
+	state.Black = state.Black.ToggleBit(&gothello.Point{Row:0, Column:2})
+	state.White = state.White.ToggleBit(&gothello.Point{Row:0, Column:4})
+	state.White = state.White.ToggleBit(&gothello.Point{Row:0, Column:6})
+
+	fmt.Println(state.ToString())
+
+	rotated90 := state.Rotate90()
+	rotated180 := state.Rotate180()
+	rotated270 := state.Rotate270()
+	mirrorH := state.MirrorHorizontal()
+	mirrorV := state.MirrorVertical()
+
+	fmt.Println(rotated90.ToString())
+	fmt.Println(rotated180.ToString())
+	fmt.Println(rotated270.ToString())
+	fmt.Println(mirrorH.ToString())
+	fmt.Println(mirrorV.ToString())
 }
