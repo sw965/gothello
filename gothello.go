@@ -376,7 +376,7 @@ func (s *State) LegalPointBitBoard() BitBoard {
 	}
 }
 
-func (s *State) HandPairBitBoard() HandPairBitBoard {
+func (s *State) NewHandPairBitBoard() HandPairBitBoard {
 	if s.Hand == BLACK {
 		return HandPairBitBoard{Self:s.Black, Opponent:s.White}
 	} else {
