@@ -62,6 +62,38 @@ func (p Point) MirrorVertical() Point {
 
 type Points []Point
 
+var UP_SIDE_POINTS = func() Points {
+	points := make(Points, COLUMN)
+	for col := 0; col < COLUMN; col++ {
+		points[col] = Point{Row:0, Column:col}
+	}
+	return points
+}()
+
+var DOWN_SIDE_POINTS = func() Points {
+	points := make(Points, COLUMN)
+	for col := 0; col < COLUMN; col++ {
+		points[col] = Point{Row:ROW-1, Column:col}
+	}
+	return points
+}()
+
+var LEFT_SIDE_POINTS = func() Points {
+	points := make(Points, ROW)
+	for row := 0; row < ROW; row++ {
+		points[row] = Point{Row:row, Column:0}
+	}
+	return points
+}()
+
+var RIGHT_SIDE_POINTS = func() Points {
+	points := make(Points, ROW)
+	for row := 0; row < ROW; row++ {
+		points[row] = Point{Row:row, Column:COLUMN-1}
+	}
+	return points
+}()
+
 var ALL_POINTS = func() Points {
 	points := make(Points, 0, FLAT_SIZE)
 	for row := 0; row < ROW; row++ {
