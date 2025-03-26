@@ -118,8 +118,8 @@ func (b BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
 	down := vertical & ShiftDown(b)
 	upRight := sideCut & ShiftUpRight(b)
 	upLeft := sideCut & ShiftUpLeft(b)
-	lowerRight := sideCut & ShiftLowerRight(b)
-	lowerLeft := sideCut & ShiftLowerLeft(b)
+	downRight := sideCut & ShiftDownRight(b)
+	downLeft := sideCut & ShiftDownLeft(b)
 
 	for i := 0; i < 5; i++ {
 		right |= horizontal & ShiftRight(right)
@@ -128,8 +128,8 @@ func (b BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
 		down |= vertical & ShiftDown(down)
 		upRight |= sideCut & ShiftUpRight(upRight)
 		upLeft |= sideCut & ShiftUpLeft(upLeft)
-		lowerRight |= sideCut & ShiftLowerRight(lowerRight)
-		lowerLeft |= sideCut & ShiftLowerLeft(lowerLeft)
+		downRight |= sideCut & ShiftDownRight(downRight)
+		downLeft |= sideCut & ShiftDownLeft(downLeft)
 	}
 
 	//最後に、1番右の相手の石より、更に1つ右側に移動し、その場所が空白であれば1を返す。
@@ -139,8 +139,8 @@ func (b BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
 	legal |= space & ShiftDown(down)
 	legal |= space & ShiftUpRight(upRight)
 	legal |= space & ShiftUpLeft(upLeft)
-	legal |= space & ShiftLowerRight(lowerRight)
-	legal |= space & ShiftLowerLeft(lowerLeft)
+	legal |= space & ShiftDownRight(downRight)
+	legal |= space & ShiftDownLeft(downLeft)
 	return legal
 }
 
@@ -155,7 +155,7 @@ func (b BitBoard) FlipPointBitBoard(opponent BitBoard, movePoint *Point) BitBoar
 
 	shifts := []func(BitBoard) BitBoard {
 		ShiftRight, ShiftLeft, ShiftUp, ShiftDown,
-		ShiftUpRight, ShiftUpLeft, ShiftLowerRight, ShiftLowerLeft,
+		ShiftUpRight, ShiftUpLeft, ShiftDownRight, ShiftDownLeft,
 	}
 
 	masks := []BitBoard{
@@ -303,13 +303,12 @@ func (b BitBoard) FlipPointBitBoard(opponent BitBoard, movePoint *Point) BitBoar
 
 func (b BitBoard) ToArray() [ROW][COLUMN]int {
 	var arr [ROW][COLUMN]int
-	for i := 0; i < FLAT_SIZE; i++ {
-		row := i / ROW
-		col := i % COLUMN
+	for i, p := range ALL_POINTS {
+		r, c := p.Row, p.Column
 		if b&(1<<i) != 0 {
-			arr[row][col] = 1
+			arr[r][c] = 1
 		} else {
-			arr[row][col] = 0
+			arr[r][c] = 0
 		}
 	}
 	return arr
@@ -339,11 +338,11 @@ func ShiftUpLeft(b BitBoard) BitBoard {
 	return b >> 9
 }
 
-func ShiftLowerRight(b BitBoard) BitBoard {
+func ShiftDownRight(b BitBoard) BitBoard {
 	return b << 9
 }
 
-func ShiftLowerLeft(b BitBoard) BitBoard {
+func ShiftDownLeft(b BitBoard) BitBoard {
 	return b << 7
 }
 
@@ -377,6 +376,14 @@ func (s *State) LegalPointBitBoard() BitBoard {
 	}
 }
 
+func (s *State) HandPairBitBoard() HandPairBitBoard {
+	if s.Hand == BLACK {
+		return HandPairBitBoard{Self:s.Black, Opponent:s.White}
+	} else {
+		return HandPairBitBoard{Self:s.White, Opponent:s.Black}
+	}
+}
+
 func (s State) Put(move *Point) State {
 	var self BitBoard
 	var opponent BitBoard
@@ -407,4 +414,14 @@ func (s State) Put(move *Point) State {
 		s.Hand = map[int]int{BLACK:WHITE, WHITE:BLACK}[s.Hand]
 	}
 	return s
+}
+
+type ColorPairBitBoard struct {
+	Black BitBoard
+	White BitBoard
+}
+
+type HandPairBitBoard struct {
+	Self     BitBoard
+	Opponent BitBoard
 }
