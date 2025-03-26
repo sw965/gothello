@@ -641,6 +641,31 @@ func (cp ColorPairBitBoard) Rotate270() ColorPairBitBoard {
 	return cp
 }
 
+func (cp *ColorPairBitBoard) ToString() string {
+	blackArr := cp.Black.ToArray()
+	whiteArr := cp.White.ToArray()
+	str := ""
+
+	for row := 0; row < ROW; row++ {
+		for col := 0; col < COLUMN; col++ {
+			var mark string
+			if blackArr[row][col] == 1 {
+				mark = "b"
+			} else if whiteArr[row][col] == 1 {
+				mark = "w"
+			} else {
+				mark = "-"
+			}
+			if col != COLUMN-1 {
+				mark += " "
+			}
+			str += mark
+		}
+		str += "\n"
+	}
+	return str
+}
+
 type HandPairBitBoard struct {
 	Self     BitBoard
 	Opponent BitBoard
@@ -674,4 +699,29 @@ func (hp HandPairBitBoard) Rotate270() HandPairBitBoard {
 	hp.Self = hp.Self.Rotate270()
 	hp.Opponent = hp.Opponent.Rotate270()
 	return hp
+}
+
+func (hp *HandPairBitBoard) ToString() string {
+	selfArr := hp.Self.ToArray()
+	oppArr := hp.Opponent.ToArray()
+	str := ""
+
+	for row := 0; row < ROW; row++ {
+		for col := 0; col < COLUMN; col++ {
+			var mark string
+			if selfArr[row][col] == 1 {
+				mark = "s"
+			} else if oppArr[row][col] == 1 {
+				mark = "o"
+			} else {
+				mark = "-"
+			}
+			if col != COLUMN-1 {
+				mark += " "
+			}
+			str += mark
+		}
+		str += "\n"
+	}
+	return str
 }
