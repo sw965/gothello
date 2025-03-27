@@ -611,6 +611,10 @@ type ColorPairBitBoard struct {
 	White BitBoard
 }
 
+func (cp *ColorPairBitBoard) SpaceBitBoard() BitBoard {
+	return ^(cp.Black | cp.White)
+}
+
 func (cp ColorPairBitBoard) MirrorHorizontal() ColorPairBitBoard {
 	cp.Black = cp.Black.MirrorHorizontal()
 	cp.White = cp.White.MirrorHorizontal()
@@ -669,6 +673,10 @@ func (cp *ColorPairBitBoard) ToString() string {
 type HandPairBitBoard struct {
 	Self     BitBoard
 	Opponent BitBoard
+}
+
+func (hp *HandPairBitBoard) SpaceBitBoard() BitBoard {
+	return ^(hp.Self | hp.Opponent)
 }
 
 func (hp HandPairBitBoard) MirrorHorizontal() HandPairBitBoard {
