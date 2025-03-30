@@ -7,6 +7,12 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+func TestPointToIndex(t *testing.T) {
+	for _, point := range gothello.ALL_POINTS {
+		fmt.Println(point, point.ToIndex())
+	}
+}
+
 func Test(t *testing.T) {
 	/*
 		引用した局面

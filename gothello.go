@@ -15,6 +15,10 @@ type Point struct {
 	Column int
 }
 
+func (p *Point) ToIndex() int {
+	return p.Row * COLUMN + p.Column
+}
+
 // 時計回り90度回転したときの座標を返す。
 // 例: Point{Row:0, Column:0} -> {Row:0, Column:7}
 func (p Point) Rotate90() Point {
@@ -707,6 +711,25 @@ func (hp HandPairBitBoard) Rotate270() HandPairBitBoard {
 	hp.Self = hp.Self.Rotate270()
 	hp.Opponent = hp.Opponent.Rotate270()
 	return hp
+}
+
+func (hp *HandPairBitBoard) ToArray() [][]int {
+	selfArr := hp.Self.ToArray()
+	oppArr := hp.Opponent.ToArray()
+	arr := make([][]int, ROW)
+	for i := range arr {
+		arr[i] = make([]int, COLUMN)
+	}
+	for i := range arr {
+		for j := range arr[i] {
+			if selfArr[i][j] == 1 {
+				arr[i][j] = 1
+			} else if oppArr[i][j] == 1 {
+				arr[i][j] = 2
+			}
+		}
+	}
+	return arr
 }
 
 func (hp *HandPairBitBoard) ToString() string {
