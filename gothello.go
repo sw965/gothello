@@ -7,6 +7,7 @@ import (
 const (
 	ROW = 8
 	COLUMN = 8
+	SIDE_SIZE = 8
 	FLAT_SIZE = ROW * COLUMN
 )
 
