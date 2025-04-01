@@ -146,8 +146,8 @@ type BitBoard uint64
 var POINT_BY_BIT_BOARD = func() map[BitBoard]Point {
 	m := map[BitBoard]Point{}
 	for i, point := range ALL_POINTS {
-		b := BitBoard(0)
-		b = b << (i+1)
+		b := BitBoard(1)
+		b = b << (i)
 		m[b] = point
 	}
 	return m

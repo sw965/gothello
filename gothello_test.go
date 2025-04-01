@@ -13,6 +13,20 @@ func TestPointToIndex(t *testing.T) {
 	}
 }
 
+func TestToOneHots(t *testing.T) {
+	b := gothello.BitBoard(0b10000000_01000000_00100000_00010000_00001000_00000100_00000010_00000001)
+	oneHots := b.ToOneHots()
+	for _, oneHot := range oneHots {
+		fmt.Println(oneHot.ToArray())
+	} 
+}
+
+func TestToPoints(t *testing.T) {
+	b := gothello.BitBoard(0b10000000_01000000_00100000_00010000_00001000_00000100_00000010_00000001)
+	points := b.ToPoints()
+	fmt.Println(points)
+}
+
 func Test(t *testing.T) {
 	/*
 		引用した局面
