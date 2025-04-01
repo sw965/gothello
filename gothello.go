@@ -143,6 +143,16 @@ var ALL_POINTS = func() Points {
 
 type BitBoard uint64
 
+var POINT_BY_BIT_BOARD = func() map[BitBoard]Point {
+	m := map[BitBoard]Point{}
+	for i, point := range ALL_POINTS {
+		b := BitBoard(0)
+		b = b << (i+1)
+		m[b] = point
+	}
+	return m
+}()
+
 func (b BitBoard) ToggleBit(p *Point) BitBoard {
 	return b ^ (1 << (p.Row * COLUMN + p.Column))
 }
@@ -195,18 +205,24 @@ func (b BitBoard) Rotate270() BitBoard {
 	return b
 }
 
-func (b BitBoard) ToPoints() Points {
+func (b BitBoard) ToOneHots() []BitBoard {
 	count := bits.OnesCount64(uint64(b))
-	points := make(Points, 0, count)
-
+	oneHots := make([]BitBoard, 0, count)
 	for b != 0 {
-		// 最下位の1ビットまでを抽出 (例 10101100 ならば 100を抽出)
+		// 最下位の1ビットを抽出
 		lsb := b & -b
-		// lsb 1のインデックスを取得 (上記の例であれば、100なので、2を取得する)
-		idx := bits.TrailingZeros64(uint64(lsb))
-		points = append(points, ALL_POINTS[idx])		
-		// 抽出済みのビットをクリア(上記の例であれば、10101000 になる)
+		oneHots = append(oneHots, lsb)
+		// 抽出したビットをクリア
 		b ^= lsb
+	}
+	return oneHots
+}
+
+func (b BitBoard) ToPoints() Points {
+	oneHots := b.ToOneHots()
+	points := make(Points, len(oneHots))
+	for i, oneHot := range oneHots {
+		points[i] = POINT_BY_BIT_BOARD[oneHot]
 	}
 	return points
 }
