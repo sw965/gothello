@@ -68,9 +68,9 @@ func (p Point) MirrorVertical() Point {
 type Points []Point
 
 var UP_EDGE_POINTS = func() Points {
-	points := make(Points, COLUMN-2)
+	points := make(Points, 0, COLUMN-2)
 	for col := 1; col < COLUMN-1; col++ {
-		points[col] = Point{Row:0, Column:col}
+		points = append(points, Point{Row:0, Column:col})
 	}
 	return points
 }()
@@ -84,9 +84,9 @@ var UP_SIDE_POINTS = func() Points {
 }()
 
 var DOWN_EDGE_POINTS = func() Points {
-	points := make(Points, COLUMN-2)
+	points := make(Points, 0, COLUMN-2)
 	for col := 1; col < COLUMN-1; col++ {
-		points[col] = Point{Row:ROW-1, Column:col}
+		points = append(points, Point{Row:ROW-1, Column:col})
 	}
 	return points
 }()
@@ -100,9 +100,9 @@ var DOWN_SIDE_POINTS = func() Points {
 }()
 
 var LEFT_EDGE_POINTS = func() Points {
-	points := make(Points, ROW-2)
+	points := make(Points, 0, ROW-2)
 	for row := 1; row < ROW-1; row++ {
-		points[row] = Point{Row:row, Column:0}
+		points = append(points, Point{Row:row, Column:0})
 	}
 	return points
 }()
@@ -116,9 +116,9 @@ var LEFT_SIDE_POINTS = func() Points {
 }()
 
 var RIGHT_EDGE_POINTS = func() Points {
-	points := make(Points, ROW-2)
+	points := make(Points, 0, ROW-2)
 	for row := 1; row < ROW-1; row++ {
-		points[row] = Point{Row:row, Column:COLUMN-1}
+		points = append(points, Point{Row:row, Column:COLUMN-1})
 	}
 	return points
 }()
