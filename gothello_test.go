@@ -7,6 +7,12 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+func TestOneHotBitBoards(t *testing.T) {
+	for _, oneHot := range gothello.ONE_HOT_BIT_BOARDS {
+		fmt.Println(oneHot.ToArray())
+	}
+}
+
 func TestPointToIndex(t *testing.T) {
 	for _, point := range gothello.ALL_POINTS {
 		fmt.Println(point, point.ToIndex())

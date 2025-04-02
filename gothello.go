@@ -143,6 +143,16 @@ var ALL_POINTS = func() Points {
 
 type BitBoard uint64
 
+var ONE_HOT_BIT_BOARDS = func() []BitBoard{
+	oneHots := make([]BitBoard, FLAT_SIZE)
+	for i, point := range ALL_POINTS {
+		b := BitBoard(0)
+		b = b.ToggleBit(&point)
+		oneHots[i] = b
+	}
+	return oneHots
+}()
+
 var GROUP_BIT_BOARDS = []BitBoard{
 	//隅
 	0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001,
