@@ -485,34 +485,19 @@ func (b BitBoard) FlipPointBitBoard(opponent BitBoard, movePoint *Point) BitBoar
 	var flips BitBoard
 	for i, shift := range shifts {
 		mask := masks[i]
-		var candidate BitBoard
 
 		//置く石の座標からスタートして、ある方向に1つ進む
-		current := shift(move) & mask
-
-		/*
-			マスクの範囲外に飛び出た場合、current == 0 になる。
-			currentは現在探索している座標のみに1が立っているので、current&opponentでその座標に相手の石があるかを調べる。
-			1ならば、currentの座標に相手の石が存在する。0ならば相手の石は存在しない。
-			よって、このfor文は、currentがマスクの範囲内かつ相手の石が存在する場合に、ループする。
-			1回ループする度に、currentを1つ先に進める。
-		*/
-
-		for current != 0 && (current&opponent) != 0 {
-			candidate |= current
-			current = shift(current) & mask
+		currentRaw := shift(move)
+		currentMasked := currentRaw & mask
+		var candidate BitBoard
+		
+		for currentMasked != 0 && (currentMasked & opponent) != 0 {
+			candidate |= currentMasked
+			currentRaw = shift(currentRaw)
+			currentMasked = currentRaw & mask
 		}
 
-		/*
-			上記のfor文で、マスクの範囲外に飛び出た場合は、current == 0であり、ひっくり返す事は出来ない。
-			相手の石が壁にぶつかる(範囲外に飛び出る)まで続いており、自分の石がおけない状態。
-
-			current&opponent == 0 で止まった場合は、進んだ先に、相手の石が見つからなかった状態。
-			もしも、進んだ先が自分の石ならば、candidateで蓄積した座標をひっくり返す事が出来る。
-
-			よって(current & b) != 0 とする事で、ひっくり返せるかどうかをチェック出来る。
-		*/
-		if (current & b) != 0 {
+		if (currentRaw & b) != 0 {
 			flips |= candidate
 		}
 	}

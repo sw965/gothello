@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/sw965/gothello"
 	"golang.org/x/exp/slices"
+	omwrand "github.com/sw965/omw/math/rand"
 )
 
 func TestOneHotBitBoards(t *testing.T) {
@@ -106,4 +107,30 @@ func TestRotate90(t *testing.T) {
 	fmt.Println(rotated270.ToString())
 	fmt.Println(mirrorH.ToString())
 	fmt.Println(mirrorV.ToString())
+}
+
+func TestFlipPointBitBoard(t *testing.T) {
+	r := omwrand.NewMt19937()
+	for i := 0; i < 6400; i++ {
+		state := gothello.NewInitState()
+		for {
+			legalPoins := state.LegalPointBitBoard().ToPoints()
+			for _, point := range legalPoins {
+				hand := state.NewHandPairBitBoard()
+				if hand.Self.FlipPointBitBoard(hand.Opponent, &point) == 0 {
+					t.Errorf("テスト失敗")
+					return
+				}
+			}
+			point := omwrand.Choice(legalPoins, r)
+			state = state.Put(&point)
+
+			black := state.Black.LegalPointBitBoard(state.White)
+			white := state.White.LegalPointBitBoard(state.Black)
+
+			if black == 0 && white == 0 {
+				break
+			}
+		}
+	}
 }
