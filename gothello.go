@@ -2,6 +2,7 @@ package gothello
 
 import (
 	"math/bits"
+	omwslices "github.com/sw965/omw/slices"
 )
 
 const (
@@ -67,69 +68,47 @@ func (p Point) MirrorVertical() Point {
 
 type Points []Point
 
-var UP_EDGE_POINTS = func() Points {
-	points := make(Points, 0, COLUMN-2)
-	for col := 1; col < COLUMN-1; col++ {
-		points = append(points, Point{Row:0, Column:col})
-	}
-	return points
-}()
+var (
+	RIGHT_FLOW_UP_SIDE_POINTS = func() Points {
+		points := make(Points, COLUMN)
+			for col := 0; col < COLUMN; col++ {
+			points[col] = Point{Row:0, Column:col}
+		}
+		return points
+	}()
 
-var UP_SIDE_POINTS = func() Points {
-	points := make(Points, COLUMN)
-	for col := 0; col < COLUMN; col++ {
-		points[col] = Point{Row:0, Column:col}
-	}
-	return points
-}()
+	LEFT_FLOW_UP_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_UP_SIDE_POINTS)
 
-var DOWN_EDGE_POINTS = func() Points {
-	points := make(Points, 0, COLUMN-2)
-	for col := 1; col < COLUMN-1; col++ {
-		points = append(points, Point{Row:ROW-1, Column:col})
-	}
-	return points
-}()
+	RIGHT_FLOW_DOWN_SIDE_POINTS = func() Points {
+		points := make(Points, COLUMN)
+		for col := 0; col < COLUMN; col++ {
+			points[col] = Point{Row:ROW-1, Column:col}
+		}
+		return points
+	}()
 
-var DOWN_SIDE_POINTS = func() Points {
-	points := make(Points, COLUMN)
-	for col := 0; col < COLUMN; col++ {
-		points[col] = Point{Row:ROW-1, Column:col}
-	}
-	return points
-}()
+	LEFT_FLOW_DOWN_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_DOWN_SIDE_POINTS)
 
-var LEFT_EDGE_POINTS = func() Points {
-	points := make(Points, 0, ROW-2)
-	for row := 1; row < ROW-1; row++ {
-		points = append(points, Point{Row:row, Column:0})
-	}
-	return points
-}()
+	DOWN_FLOW_LEFT_SIDE_POINTS = func() Points {
+		points := make(Points, ROW)
+		for row := 0; row < ROW; row++ {
+			points[row] = Point{Row:row, Column:0}
+		}
+		return points
+	}()
 
-var LEFT_SIDE_POINTS = func() Points {
-	points := make(Points, ROW)
-	for row := 0; row < ROW; row++ {
-		points[row] = Point{Row:row, Column:0}
-	}
-	return points
-}()
+	UP_FLOW_LEFT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_LEFT_SIDE_POINTS)
 
-var RIGHT_EDGE_POINTS = func() Points {
-	points := make(Points, 0, ROW-2)
-	for row := 1; row < ROW-1; row++ {
-		points = append(points, Point{Row:row, Column:COLUMN-1})
-	}
-	return points
-}()
+	DOWN_FLOW_RIGHT_SIDE_POINTS = func() Points {
+		points := make(Points, ROW)
+		for row := 0; row < ROW; row++ {
+			points[row] = Point{Row:row, Column:COLUMN-1}
+		}
+		return points
+	}()
 
-var RIGHT_SIDE_POINTS = func() Points {
-	points := make(Points, ROW)
-	for row := 0; row < ROW; row++ {
-		points[row] = Point{Row:row, Column:COLUMN-1}
-	}
-	return points
-}()
+	UP_FLOW_RIGHT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_RIGHT_SIDE_POINTS)
+)
 
 var ALL_POINTS = func() Points {
 	points := make(Points, 0, FLAT_SIZE)
