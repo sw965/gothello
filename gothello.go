@@ -12,233 +12,83 @@ const (
 	FLAT_SIZE = ROW * COLUMN
 )
 
-type Point struct {
-	Row int
-	Column int
-}
-
-func (p *Point) ToIndex() int {
-	return p.Row * COLUMN + p.Column
-}
-
-// 時計回り90度回転したときの座標を返す。
-// 例: Point{Row:0, Column:0} -> {Row:0, Column:7}
-func (p Point) Rotate90() Point {
-	return Point{
-		Row:    p.Column,
-		Column: COLUMN - 1 - p.Row,
-	}
-}
-
-// 180度回転したときの座標を返す。
-// 例: Point{Row:0, Column:0} -> {Row:7, Column:7}
-func (p Point) Rotate180() Point {
-	return Point{
-		Row:    ROW - 1 - p.Row,
-		Column: COLUMN - 1 - p.Column,
-	}
-}
-
-// 時計回り270度回転したときの座標を返す。
-// 例: Point{Row:0, Column:0} -> {Row:7, Column:0}
-func (p Point) Rotate270() Point {
-	return Point{
-		Row:    ROW - 1 - p.Column,
-		Column: p.Row,
-	}
-}
-
-// 左右反転したときの座標を返す。
-// 例: Point{Row:0, Column:0} -> {Row:0, Column:7}
-func (p Point) MirrorHorizontal() Point {
-	return Point{
-		Row:    p.Row,
-		Column: COLUMN - 1 - p.Column,
-	}
-}
-
-// 上下反転したときの座標を返す。
-// 例: Point{Row:0, Column:0} -> {Row:7, Column:0}
-func (p Point) MirrorVertical() Point {
-	return Point{
-		Row:    ROW - 1 - p.Row,
-		Column: p.Column,
-	}
-}
-
-type Points []Point
-
-var (
-	RIGHT_FLOW_UP_SIDE_POINTS = func() Points {
-		points := make(Points, COLUMN)
-			for col := 0; col < COLUMN; col++ {
-			points[col] = Point{Row:0, Column:col}
-		}
-		return points
-	}()
-
-	LEFT_FLOW_UP_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_UP_SIDE_POINTS)
-
-	RIGHT_FLOW_DOWN_SIDE_POINTS = func() Points {
-		points := make(Points, COLUMN)
-		for col := 0; col < COLUMN; col++ {
-			points[col] = Point{Row:ROW-1, Column:col}
-		}
-		return points
-	}()
-
-	LEFT_FLOW_DOWN_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_DOWN_SIDE_POINTS)
-
-	DOWN_FLOW_LEFT_SIDE_POINTS = func() Points {
-		points := make(Points, ROW)
-		for row := 0; row < ROW; row++ {
-			points[row] = Point{Row:row, Column:0}
-		}
-		return points
-	}()
-
-	UP_FLOW_LEFT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_LEFT_SIDE_POINTS)
-
-	DOWN_FLOW_RIGHT_SIDE_POINTS = func() Points {
-		points := make(Points, ROW)
-		for row := 0; row < ROW; row++ {
-			points[row] = Point{Row:row, Column:COLUMN-1}
-		}
-		return points
-	}()
-
-	UP_FLOW_RIGHT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_RIGHT_SIDE_POINTS)
-)
-
-var ALL_POINTS = func() Points {
-	points := make(Points, 0, FLAT_SIZE)
-	for row := 0; row < ROW; row++ {
-		for col := 0; col < COLUMN; col++ {
-			points = append(points, Point{Row:row, Column:col})
-		}
-	}
-	return points
-}()
-
 type BitBoard uint64
 
-var ONE_HOT_BIT_BOARDS = func() []BitBoard{
-	oneHots := make([]BitBoard, FLAT_SIZE)
-	for i, point := range ALL_POINTS {
-		b := BitBoard(0)
-		b = b.ToggleBit(&point)
-		oneHots[i] = b
-	}
-	return oneHots
-}()
+const (
+	CORNER_POINT_BIT_BOARD = BitBoard(0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001)
+	C_POINT_BIT_BOARD = BitBoard(0b01000010_10000001_00000000_00000000_00000000_00000000_10000001_01000010)
+	A_POINT_BIT_BOARD = BitBoard(0b00100100_00000000_10000001_00000000_00000000_10000001_00000000_00100100)
+	B_POINT_BIT_BOARD = BitBoard(0b00011000_00000000_00000000_10000001_10000001_00000000_00000000_00011000)
+	X_POINT_BIT_BOARD = BitBoard(0b00000000_01000010_00000000_00000000_00000000_00000000_01000010_00000000)
+)
 
-var GROUP_BIT_BOARDS = []BitBoard{
-	//隅
-	0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001,
-	//C
-	0b01000010_10000001_00000000_00000000_00000000_00000000_10000001_01000010,
-	//A
-	0b00100100_00000000_10000001_00000000_00000000_10000001_00000000_00100100,
-	//B
-	0b00011000_00000000_00000000_10000001_10000001_00000000_00000000_00011000,
-	//X
-	0b00000000_01000010_00000000_00000000_00000000_00000000_01000010_00000000,
-
-	0b00000000_00100100_01000010_00000000_00000000_01000010_00100100_00000000,
-	0b00000000_00011000_00000000_01000010_01000010_00000000_00011000_00000000,
-	0b00000000_00000000_00100100_00000000_00000000_00100100_00000000_00000000,
-	0b00000000_00000000_00011000_00100100_00100100_00011000_00000000_00000000,
-	0b00000000_00000000_00000000_00011000_00011000_00000000_00000000_00000000,
+func (bb BitBoard) ToggleBit(p *Point) BitBoard {
+	return bb ^ (1 << (p.Row * COLUMN + p.Column))
 }
 
-var POINT_BY_BIT_BOARD = func() map[BitBoard]Point {
-	m := map[BitBoard]Point{}
-	for i, point := range ALL_POINTS {
-		b := BitBoard(1)
-		b = b << (i)
-		m[b] = point
-	}
-	return m
-}()
-
-func (b BitBoard) ToggleBit(p *Point) BitBoard {
-	return b ^ (1 << (p.Row * COLUMN + p.Column))
-}
-
-func (b BitBoard) OneIndices() []int {
-	c := bits.OnesCount64(uint64(b))
-	idxs := make([]int, 0, c)
-    for b != 0 {
-        idxs = append(idxs, bits.TrailingZeros64(uint64(b)))
-		//下位の 1 ビットをクリアする
-        b &= b - 1
-    }
-    return idxs
-}
-
-func (b BitBoard) Transpose() BitBoard {
+func (bb BitBoard) Transpose() BitBoard {
 	var t BitBoard
-	t = (b ^ (b >> 7)) & 0b00000000_10101010_00000000_10101010_00000000_10101010_00000000_10101010
-	b = b ^ t ^ (t << 7)
-	t = (b ^ (b >> 14)) & 0b00000000_00000000_11001100_11001100_00000000_00000000_11001100_11001100
-	b = b ^ t ^ (t << 14)
-	t = (b ^ (b >> 28)) & 0b00000000_00000000_00000000_00000000_11110000_11110000_11110000_11110000
-	b = b ^ t ^ (t << 28)
-	return b
+	t = (bb ^ (bb >> 7)) & 0b00000000_10101010_00000000_10101010_00000000_10101010_00000000_10101010
+	bb = bb ^ t ^ (t << 7)
+	t = (bb ^ (bb >> 14)) & 0b00000000_00000000_11001100_11001100_00000000_00000000_11001100_11001100
+	bb = bb ^ t ^ (t << 14)
+	t = (bb ^ (bb >> 28)) & 0b00000000_00000000_00000000_00000000_11110000_11110000_11110000_11110000
+	bb = bb ^ t ^ (t << 28)
+	return bb
 }
 
-func (b BitBoard) MirrorHorizontal() BitBoard {
-	b = ((b & 0b11110000_11110000_11110000_11110000_11110000_11110000_11110000_11110000) >> 4) |
-		((b & 0b00001111_00001111_00001111_00001111_00001111_00001111_00001111_00001111) << 4)
-	b = ((b & 0b11001100_11001100_11001100_11001100_11001100_11001100_11001100_11001100) >> 2) |
-		((b & 0b00110011_00110011_00110011_00110011_00110011_00110011_00110011_00110011) << 2)
-	b = ((b & 0b10101010_10101010_10101010_10101010_10101010_10101010_10101010_10101010) >> 1) |
-		((b & 0b01010101_01010101_01010101_01010101_01010101_01010101_01010101_01010101) << 1)
-	return b
+func (bb BitBoard) MirrorHorizontal() BitBoard {
+	bb = ((bb & 0b11110000_11110000_11110000_11110000_11110000_11110000_11110000_11110000) >> 4) |
+		((bb & 0b00001111_00001111_00001111_00001111_00001111_00001111_00001111_00001111) << 4)
+	bb = ((bb & 0b11001100_11001100_11001100_11001100_11001100_11001100_11001100_11001100) >> 2) |
+		((bb & 0b00110011_00110011_00110011_00110011_00110011_00110011_00110011_00110011) << 2)
+	bb = ((bb & 0b10101010_10101010_10101010_10101010_10101010_10101010_10101010_10101010) >> 1) |
+		((bb & 0b01010101_01010101_01010101_01010101_01010101_01010101_01010101_01010101) << 1)
+	return bb
 }
 
-func (b BitBoard) MirrorVertical() BitBoard {
-	return ((b & 0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000) >> 56) |
-		((b & 0b00000000_11111111_00000000_00000000_00000000_00000000_00000000_00000000) >> 40) |
-		((b & 0b00000000_00000000_11111111_00000000_00000000_00000000_00000000_00000000) >> 24) |
-		((b & 0b00000000_00000000_00000000_11111111_00000000_00000000_00000000_00000000) >> 8) |
-		((b & 0b00000000_00000000_00000000_00000000_11111111_00000000_00000000_00000000) << 8) |
-		((b & 0b00000000_00000000_00000000_00000000_00000000_11111111_00000000_00000000) << 24) |
-		((b & 0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_00000000) << 40) |
-		((b & 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_11111111) << 56)
+func (bb BitBoard) MirrorVertical() BitBoard {
+	return ((bb & 0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000) >> 56) |
+		((bb & 0b00000000_11111111_00000000_00000000_00000000_00000000_00000000_00000000) >> 40) |
+		((bb & 0b00000000_00000000_11111111_00000000_00000000_00000000_00000000_00000000) >> 24) |
+		((bb & 0b00000000_00000000_00000000_11111111_00000000_00000000_00000000_00000000) >> 8) |
+		((bb & 0b00000000_00000000_00000000_00000000_11111111_00000000_00000000_00000000) << 8) |
+		((bb & 0b00000000_00000000_00000000_00000000_00000000_11111111_00000000_00000000) << 24) |
+		((bb & 0b00000000_00000000_00000000_00000000_00000000_00000000_11111111_00000000) << 40) |
+		((bb & 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_11111111) << 56)
 }
 
-func (b BitBoard) Rotate90() BitBoard {
-	b = b.MirrorVertical()
-	b = b.Transpose()
-	return b
+func (bb BitBoard) Rotate90() BitBoard {
+	bb = bb.MirrorVertical()
+	bb = bb.Transpose()
+	return bb
 }
 
-func (b BitBoard) Rotate180() BitBoard {
-	return BitBoard(bits.Reverse64(uint64(b)))
+func (bb BitBoard) Rotate180() BitBoard {
+	return BitBoard(bits.Reverse64(uint64(bb)))
 }
 
-func (b BitBoard) Rotate270() BitBoard {
-	b = b.Transpose()
-	b = b.MirrorVertical()
-	return b
+func (bb BitBoard) Rotate270() BitBoard {
+	bb = bb.Transpose()
+	bb = bb.MirrorVertical()
+	return bb
 }
 
-func (b BitBoard) ToOneHots() []BitBoard {
-	count := bits.OnesCount64(uint64(b))
-	oneHots := make([]BitBoard, 0, count)
-	for b != 0 {
+func (bb BitBoard) ToOneHots() BitBoards {
+	count := bits.OnesCount64(uint64(bb))
+	oneHots := make(BitBoards, 0, count)
+	for bb != 0 {
 		// 最下位の1ビットを抽出
-		lsb := b & -b
+		lsb := bb & -bb
 		oneHots = append(oneHots, lsb)
 		// 抽出したビットをクリア
-		b ^= lsb
+		bb ^= lsb
 	}
 	return oneHots
 }
 
-func (b BitBoard) ToPoints() Points {
-	oneHots := b.ToOneHots()
+func (bb BitBoard) ToPoints() Points {
+	oneHots := bb.ToOneHots()
 	points := make(Points, len(oneHots))
 	for i, oneHot := range oneHots {
 		points[i] = POINT_BY_BIT_BOARD[oneHot]
@@ -253,7 +103,7 @@ func (b BitBoard) ToPoints() Points {
 	このライブラリでは、(0, 0)の地点を最下位ビットと見なしている。
 	なので、左シフトと右シフトの役割が逆になっている。
 */
-func (b BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
+func (bb BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
 	/*
 		横方向を返す合法座標を探す為のビットボード。
 		[[0 1 1 1 1 1 1 0]
@@ -298,7 +148,7 @@ func (b BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
 	*/
 	sideCut := opponent & 0b00000000_01111110_01111110_01111110_01111110_01111110_01111110_00000000
 
-	space := ^(b | opponent)
+	space := ^(bb | opponent)
 
 	/*
 		右方向への探索に関して説明。他の方向も考え方は同じ。
@@ -309,14 +159,14 @@ func (b BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
 		5. right |= とする事で、自分の石の1つ右側にある相手の石座標と、更に1つ右側にある相手の石の座標を保持する。
 		6. 後は4と5を繰り返す事で、自分の石から右側にあるn個連結した相手の石の座標を求める事が出来る。
 	*/
-	right := horizontal & ShiftRight(b)
-	left := horizontal & ShiftLeft(b)
-	up := vertical & ShiftUp(b)
-	down := vertical & ShiftDown(b)
-	upRight := sideCut & ShiftUpRight(b)
-	upLeft := sideCut & ShiftUpLeft(b)
-	downRight := sideCut & ShiftDownRight(b)
-	downLeft := sideCut & ShiftDownLeft(b)
+	right := horizontal & ShiftRight(bb)
+	left := horizontal & ShiftLeft(bb)
+	up := vertical & ShiftUp(bb)
+	down := vertical & ShiftDown(bb)
+	upRight := sideCut & ShiftUpRight(bb)
+	upLeft := sideCut & ShiftUpLeft(bb)
+	downRight := sideCut & ShiftDownRight(bb)
+	downLeft := sideCut & ShiftDownLeft(bb)
 
 	for i := 0; i < 5; i++ {
 		right |= horizontal & ShiftRight(right)
@@ -341,9 +191,8 @@ func (b BitBoard) LegalPointBitBoard(opponent BitBoard) BitBoard {
 	return legal
 }
 
-func (b BitBoard) FlipPointBitBoard(opponent BitBoard, movePoint *Point) BitBoard {
-	move := BitBoard(0).ToggleBit(movePoint)
-	occupied := b | opponent
+func (bb BitBoard) FlipPointBitBoard(opponent, move BitBoard) BitBoard {
+	occupied := bb | opponent
 
 	//既に石が置かれている場合
 	if (occupied&move) != 0 {
@@ -476,18 +325,18 @@ func (b BitBoard) FlipPointBitBoard(opponent BitBoard, movePoint *Point) BitBoar
 			currentMasked = currentRaw & mask
 		}
 
-		if (currentRaw & b) != 0 {
+		if (currentRaw & bb) != 0 {
 			flips |= candidate
 		}
 	}
 	return flips
 }
 
-func (b BitBoard) ToArray() [ROW][COLUMN]int {
+func (bb BitBoard) ToArray() [ROW][COLUMN]int {
 	var arr [ROW][COLUMN]int
 	for i, p := range ALL_POINTS {
 		r, c := p.Row, p.Column
-		if b&(1<<i) != 0 {
+		if bb&(1<<i) != 0 {
 			arr[r][c] = 1
 		} else {
 			arr[r][c] = 0
@@ -496,36 +345,53 @@ func (b BitBoard) ToArray() [ROW][COLUMN]int {
 	return arr
 }
 
-func ShiftRight(b BitBoard) BitBoard {
-	return b << 1
+func ShiftRight(bb BitBoard) BitBoard {
+	return bb << 1
 }
 
-func ShiftLeft(b BitBoard) BitBoard {
-	return b >> 1
+func ShiftLeft(bb BitBoard) BitBoard {
+	return bb >> 1
 }
 
-func ShiftUp(b BitBoard) BitBoard {
-	return b >> 8
+func ShiftUp(bb BitBoard) BitBoard {
+	return bb >> 8
 }
 
-func ShiftDown(b BitBoard) BitBoard {
-	return b << 8
+func ShiftDown(bb BitBoard) BitBoard {
+	return bb << 8
 }
 
-func ShiftUpRight(b BitBoard) BitBoard {
-	return b >> 7
+func ShiftUpRight(bb BitBoard) BitBoard {
+	return bb >> 7
 }
 
-func ShiftUpLeft(b BitBoard) BitBoard {
-	return b >> 9
+func ShiftUpLeft(bb BitBoard) BitBoard {
+	return bb >> 9
 }
 
-func ShiftDownRight(b BitBoard) BitBoard {
-	return b << 9
+func ShiftDownRight(bb BitBoard) BitBoard {
+	return bb << 9
 }
 
-func ShiftDownLeft(b BitBoard) BitBoard {
-	return b << 7
+func ShiftDownLeft(bb BitBoard) BitBoard {
+	return bb << 7
+}
+
+type BitBoards []BitBoard
+
+var ONE_HOT_BIT_BOARDS = BitBoard(0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111).ToOneHots()
+
+var GROUP_BIT_BOARDS = BitBoards{
+	CORNER_POINT_BIT_BOARD,
+	C_POINT_BIT_BOARD,
+	A_POINT_BIT_BOARD,
+	B_POINT_BIT_BOARD,
+	X_POINT_BIT_BOARD,
+	0b00000000_00100100_01000010_00000000_00000000_01000010_00100100_00000000,
+	0b00000000_00011000_00000000_01000010_01000010_00000000_00011000_00000000,
+	0b00000000_00000000_00100100_00000000_00000000_00100100_00000000_00000000,
+	0b00000000_00000000_00011000_00100100_00100100_00011000_00000000_00000000,
+	0b00000000_00000000_00000000_00011000_00011000_00000000_00000000_00000000,
 }
 
 const (
@@ -566,7 +432,7 @@ func (s *State) NewHandPairBitBoard() HandPairBitBoard {
 	}
 }
 
-func (s State) Put(move *Point) State {
+func (s State) Put(move BitBoard) State {
 	var self BitBoard
 	var opponent BitBoard
 
@@ -580,7 +446,7 @@ func (s State) Put(move *Point) State {
 
 	flips := self.FlipPointBitBoard(opponent, move)
 	//石を置いて、ひっくり返す。
-	self |= self.ToggleBit(move) | flips
+	self |= move | flips
 	//ひっくり返される石を消す。
 	opponent &^= flips
 
@@ -809,3 +675,84 @@ func (hp *HandPairBitBoard) ToString() string {
 	}
 	return str
 }
+
+type Point struct {
+	Row int
+	Column int
+}
+
+func (p *Point) ToIndex() int {
+	return p.Row * COLUMN + p.Column
+}
+
+type Points []Point
+
+var ALL_POINTS = func() Points {
+	points := make(Points, 0, FLAT_SIZE)
+	for row := 0; row < ROW; row++ {
+		for col := 0; col < COLUMN; col++ {
+			points = append(points, Point{Row:row, Column:col})
+		}
+	}
+	return points
+}()
+
+var (
+	RIGHT_FLOW_UP_SIDE_POINTS = func() Points {
+		points := make(Points, COLUMN)
+			for col := 0; col < COLUMN; col++ {
+			points[col] = Point{Row:0, Column:col}
+		}
+		return points
+	}()
+
+	LEFT_FLOW_UP_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_UP_SIDE_POINTS)
+
+	RIGHT_FLOW_DOWN_SIDE_POINTS = func() Points {
+		points := make(Points, COLUMN)
+		for col := 0; col < COLUMN; col++ {
+			points[col] = Point{Row:ROW-1, Column:col}
+		}
+		return points
+	}()
+
+	LEFT_FLOW_DOWN_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_DOWN_SIDE_POINTS)
+
+	DOWN_FLOW_LEFT_SIDE_POINTS = func() Points {
+		points := make(Points, ROW)
+		for row := 0; row < ROW; row++ {
+			points[row] = Point{Row:row, Column:0}
+		}
+		return points
+	}()
+
+	UP_FLOW_LEFT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_LEFT_SIDE_POINTS)
+
+	DOWN_FLOW_RIGHT_SIDE_POINTS = func() Points {
+		points := make(Points, ROW)
+		for row := 0; row < ROW; row++ {
+			points[row] = Point{Row:row, Column:COLUMN-1}
+		}
+		return points
+	}()
+
+	UP_FLOW_RIGHT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_RIGHT_SIDE_POINTS)
+)
+
+var POINT_BY_BIT_BOARD = func() map[BitBoard]Point {
+	m := map[BitBoard]Point{}
+	for i, point := range ALL_POINTS {
+		bb := BitBoard(1)
+		bb = bb << (i)
+		m[bb] = point
+	}
+	return m
+}()
+
+var BIT_BOARD_BY_POINT = func() map[Point]BitBoard {
+	m := map[Point]BitBoard{}
+	for k, v := range POINT_BY_BIT_BOARD {
+		m[v] = k
+	}
+	return m
+}()
