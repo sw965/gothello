@@ -8,6 +8,11 @@ import (
 	omwrand "github.com/sw965/omw/math/rand"
 )
 
+func TestOneIndices(t *testing.T) {
+	bb := gothello.BitBoard(0b10000000_01000000_00100000_00010000_00001000_00000100_00000010_00000001)
+	fmt.Println(bb.OneIndices())
+}
+
 func TestSidePoints(t *testing.T) {
 	fmt.Println(gothello.RIGHT_FLOW_UP_SIDE_POINTS)
 	fmt.Println(gothello.LEFT_FLOW_UP_SIDE_POINTS)
@@ -23,7 +28,7 @@ func TestSidePoints(t *testing.T) {
 }
 
 func TestOneHotBitBoards(t *testing.T) {
-	for _, oneHot := range gothello.ALL_ONE_HOT_BIT_BOARDS {
+	for _, oneHot := range gothello.ONE_HOT_BIT_BOARDS {
 		fmt.Println(oneHot.ToArray())
 	}
 }

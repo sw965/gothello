@@ -74,6 +74,19 @@ func (bb BitBoard) Rotate270() BitBoard {
 	return bb
 }
 
+func (bb BitBoard) OneIndices() []int {
+	idxs := make([]int, 0, bits.OnesCount64(uint64(bb)))
+	b := uint64(bb)
+	for b != 0 {
+		// 最下位の1ビットの位置を求める
+		idx := bits.TrailingZeros64(b)
+		idxs = append(idxs, idx)
+		// 最下位の1ビットをクリア
+		b &= b - 1
+	}
+	return idxs
+}
+
 func (bb BitBoard) ToOneHots() BitBoards {
 	count := bits.OnesCount64(uint64(bb))
 	oneHots := make(BitBoards, 0, count)
