@@ -2,7 +2,6 @@ package gothello
 
 import (
 	"math/bits"
-	omwslices "github.com/sw965/omw/slices"
 )
 
 const (
@@ -22,10 +21,7 @@ const (
 	X_POINT_BIT_BOARD = BitBoard(0b00000000_01000010_00000000_00000000_00000000_00000000_01000010_00000000)
 )
 
-func (bb BitBoard) ToggleBit(p *Point) BitBoard {
-	return bb ^ (1 << (p.Row * COLUMN + p.Column))
-}
-
+//転置行列と同じ
 func (bb BitBoard) Transpose() BitBoard {
 	var t BitBoard
 	t = (bb ^ (bb >> 7)) & 0b00000000_10101010_00000000_10101010_00000000_10101010_00000000_10101010
@@ -37,6 +33,7 @@ func (bb BitBoard) Transpose() BitBoard {
 	return bb
 }
 
+//横回転
 func (bb BitBoard) MirrorHorizontal() BitBoard {
 	bb = ((bb & 0b11110000_11110000_11110000_11110000_11110000_11110000_11110000_11110000) >> 4) |
 		((bb & 0b00001111_00001111_00001111_00001111_00001111_00001111_00001111_00001111) << 4)
@@ -47,6 +44,7 @@ func (bb BitBoard) MirrorHorizontal() BitBoard {
 	return bb
 }
 
+//縦回転
 func (bb BitBoard) MirrorVertical() BitBoard {
 	return ((bb & 0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000) >> 56) |
 		((bb & 0b00000000_11111111_00000000_00000000_00000000_00000000_00000000_00000000) >> 40) |
@@ -87,24 +85,25 @@ func (bb BitBoard) OneIndices() []int {
 	return idxs
 }
 
-func (bb BitBoard) ToOneHots() BitBoards {
+func (bb BitBoard) ToSingles() BitBoards {
 	count := bits.OnesCount64(uint64(bb))
-	oneHots := make(BitBoards, 0, count)
+	singles := make(BitBoards, 0, count)
 	for bb != 0 {
 		// 最下位の1ビットを抽出
 		lsb := bb & -bb
-		oneHots = append(oneHots, lsb)
+		singles = append(singles, lsb)
 		// 抽出したビットをクリア
 		bb ^= lsb
 	}
-	return oneHots
+	return singles
 }
 
 func (bb BitBoard) ToPoints() Points {
-	oneHots := bb.ToOneHots()
-	points := make(Points, len(oneHots))
-	for i, oneHot := range oneHots {
-		points[i] = POINT_BY_BIT_BOARD[oneHot]
+	singles := bb.ToSingles()
+	points := make(Points, 0, len(singles))
+	for _, single := range singles {
+		idx := bits.TrailingZeros64(uint64(single))
+		points = append(points, ALL_POINTS[idx])
 	}
 	return points
 }
@@ -392,7 +391,7 @@ func ShiftDownLeft(bb BitBoard) BitBoard {
 
 type BitBoards []BitBoard
 
-var ONE_HOT_BIT_BOARDS = BitBoard(0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111).ToOneHots()
+var SINGLE_BIT_BOARDS = BitBoard(0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111).ToSingles()
 
 var GROUP_BIT_BOARDS = BitBoards{
 	CORNER_POINT_BIT_BOARD,
@@ -708,64 +707,4 @@ var ALL_POINTS = func() Points {
 		}
 	}
 	return points
-}()
-
-var (
-	RIGHT_FLOW_UP_SIDE_POINTS = func() Points {
-		points := make(Points, COLUMN)
-			for col := 0; col < COLUMN; col++ {
-			points[col] = Point{Row:0, Column:col}
-		}
-		return points
-	}()
-
-	LEFT_FLOW_UP_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_UP_SIDE_POINTS)
-
-	RIGHT_FLOW_DOWN_SIDE_POINTS = func() Points {
-		points := make(Points, COLUMN)
-		for col := 0; col < COLUMN; col++ {
-			points[col] = Point{Row:ROW-1, Column:col}
-		}
-		return points
-	}()
-
-	LEFT_FLOW_DOWN_SIDE_POINTS = omwslices.Reverse(RIGHT_FLOW_DOWN_SIDE_POINTS)
-
-	DOWN_FLOW_LEFT_SIDE_POINTS = func() Points {
-		points := make(Points, ROW)
-		for row := 0; row < ROW; row++ {
-			points[row] = Point{Row:row, Column:0}
-		}
-		return points
-	}()
-
-	UP_FLOW_LEFT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_LEFT_SIDE_POINTS)
-
-	DOWN_FLOW_RIGHT_SIDE_POINTS = func() Points {
-		points := make(Points, ROW)
-		for row := 0; row < ROW; row++ {
-			points[row] = Point{Row:row, Column:COLUMN-1}
-		}
-		return points
-	}()
-
-	UP_FLOW_RIGHT_SIDE_POINTS = omwslices.Reverse(DOWN_FLOW_RIGHT_SIDE_POINTS)
-)
-
-var POINT_BY_BIT_BOARD = func() map[BitBoard]Point {
-	m := map[BitBoard]Point{}
-	for i, point := range ALL_POINTS {
-		bb := BitBoard(1)
-		bb = bb << (i)
-		m[bb] = point
-	}
-	return m
-}()
-
-var BIT_BOARD_BY_POINT = func() map[Point]BitBoard {
-	m := map[Point]BitBoard{}
-	for k, v := range POINT_BY_BIT_BOARD {
-		m[v] = k
-	}
-	return m
 }()
