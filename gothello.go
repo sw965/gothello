@@ -44,7 +44,7 @@ const (
 
 var ADJACENT_BY_SINGLE_BIT_BOARD = func() map[BitBoard]BitBoard {
 	m := map[BitBoard]BitBoard{}
-	for i := 0; i < FLAT_SIZE; i++ {
+	for i := 0; i < BOARD_SIZE; i++ {
 		single := BitBoard(1) << i
 		var adj BitBoard = 0
 		row, col := IndexToRowAndColumn(i)
@@ -401,7 +401,7 @@ func (bb BitBoard) FlipBitBoard(opponent, move BitBoard) BitBoard {
 
 func (bb BitBoard) ToArray() [ROW][COLUMN]int {
 	var arr [ROW][COLUMN]int
-	for i := 0; i < FLAT_SIZE; i++ {
+	for i := 0; i < BOARD_SIZE; i++ {
 		row, col := IndexToRowAndColumn(i)
 		if bb&(1<<i) != 0 {
 			arr[row][col] = 1
@@ -723,7 +723,7 @@ func (hp *HandPairBitBoard) ToString() string {
 	oppArr := hp.Opponent.ToArray()
 	str := ""
 
-	for i := 0; i < FLAT_SIZE; i++ {
+	for i := 0; i < BOARD_SIZE; i++ {
 		row, col := IndexToRowAndColumn(i)
 		var mark string
 		if selfArr[row][col] == 1 {
