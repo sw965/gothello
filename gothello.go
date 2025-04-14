@@ -9,7 +9,14 @@ const (
 	ROW = 8
 	COLUMN = 8
 	SIDE_SIZE = 8
-	FLAT_SIZE = ROW * COLUMN
+	BOARD_SIZE = ROW * COLUMN
+)
+
+const (
+	UP_LEFT_CORNER_INDEX = 0
+	UP_RIGHT_CORNER_INDEX = 7
+	DOWN_LEFT_CORNER_INDEX = 56
+	DOWN_RIGHT_CORNER_INDEX = 63
 )
 
 func IndexToRowAndColumn(idx int) (int, int) {
