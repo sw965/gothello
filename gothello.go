@@ -19,12 +19,79 @@ const (
 	DOWN_RIGHT_CORNER_INDEX = 63
 )
 
+var (
+	UP_SIDE_INDICES = func() []int {
+		idxs := make([]int, COLUMN)
+		for i := range idxs {
+			idxs[i] = i
+		}
+		return idxs
+	}()
+
+	DOWN_SIDE_INDICES = func() []int {
+		idxs := make([]int, COLUMN)
+		for i := range idxs {
+			idxs[i] = DOWN_LEFT_CORNER_INDEX + i
+		}
+		return idxs
+	}()
+
+	LEFT_SIDE_INDICES = func() []int {
+		idxs := make([]int, ROW)
+		for i := range idxs {
+			idxs[i] = i * COLUMN
+		}
+		return idxs
+	}()
+
+	RIGHT_SIDE_INDICES = func() []int {
+		idxs := make([]int, ROW)
+		for i := range idxs {
+			idxs[i] = UP_RIGHT_CORNER_INDEX + (i * COLUMN)
+		}
+		return idxs
+	}()
+)
+
 func IndexToRowAndColumn(idx int) (int, int) {
 	return idx/COLUMN, idx%COLUMN
 }
 
 func RowAndColumnToIndex(row, col int) int {
 	return row * COLUMN + col
+}
+
+func MirrorHorizontalIndex(idx int) int {
+	row, col := IndexToRowAndColumn(idx)
+	newCol := (COLUMN - 1) - col
+	return row*COLUMN + newCol
+}
+
+func MirrorVerticalIndex(idx int) int {
+	row, col := IndexToRowAndColumn(idx)
+	newRow := (ROW - 1) - row
+	return newRow*COLUMN + col
+}
+
+func Rotate90Index(idx int) int {
+	row, col := IndexToRowAndColumn(idx)
+	newRow := col
+	newCol := (ROW - 1) - row
+	return newRow*COLUMN + newCol
+}
+
+func Rotate180Index(idx int) int {
+	row, col := IndexToRowAndColumn(idx)
+	newRow := (ROW - 1) - row
+	newCol := (COLUMN - 1) - col
+	return newRow*COLUMN + newCol
+}
+
+func Rotate270Index(idx int) int {
+	row, col := IndexToRowAndColumn(idx)
+	newRow := (COLUMN - 1) - col
+	newCol := row
+	return newRow*COLUMN + newCol
 }
 
 type BitBoard uint64
@@ -747,39 +814,6 @@ func (hp *HandPairBitBoard) ToString() string {
 
 	str += "\n"
 	return str
-}
-
-func MirrorHorizontalIndex(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newCol := (COLUMN - 1) - col
-	return row*COLUMN + newCol
-}
-
-func MirrorVerticalIndex(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := (ROW - 1) - row
-	return newRow*COLUMN + col
-}
-
-func Rotate90Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := col
-	newCol := (ROW - 1) - row
-	return newRow*COLUMN + newCol
-}
-
-func Rotate180Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := (ROW - 1) - row
-	newCol := (COLUMN - 1) - col
-	return newRow*COLUMN + newCol
-}
-
-func Rotate270Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := (COLUMN - 1) - col
-	newCol := row
-	return newRow*COLUMN + newCol
 }
 
 type Cell struct {

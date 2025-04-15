@@ -7,6 +7,13 @@ import (
 	omwrand "github.com/sw965/omw/math/rand"
 )
 
+func TestSideIndices(t *testing.T) {
+	fmt.Println("upIdx =", gothello.UP_SIDE_INDICES)
+	fmt.Println("downIdx =", gothello.DOWN_SIDE_INDICES)
+	fmt.Println("leftIdx =", gothello.LEFT_SIDE_INDICES)
+	fmt.Println("rightIdx =", gothello.RIGHT_SIDE_INDICES)
+}
+
 func TestAdjacentBySingleBitBoard(t *testing.T) {
 	for k, v := range gothello.ADJACENT_BY_SINGLE_BIT_BOARD {
 		fmt.Println(k.ToArray())
