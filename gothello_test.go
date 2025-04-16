@@ -8,10 +8,17 @@ import (
 )
 
 func TestSideIndices(t *testing.T) {
-	fmt.Println("upIdx =", gothello.UP_SIDE_INDICES)
-	fmt.Println("downIdx =", gothello.DOWN_SIDE_INDICES)
-	fmt.Println("leftIdx =", gothello.LEFT_SIDE_INDICES)
-	fmt.Println("rightIdx =", gothello.RIGHT_SIDE_INDICES)
+	fmt.Println("upSideIdxs =", gothello.UP_SIDE_INDICES)
+	fmt.Println("downSideIdxs =", gothello.DOWN_SIDE_INDICES)
+	fmt.Println("leftSideIdxs =", gothello.LEFT_SIDE_INDICES)
+	fmt.Println("rightSideIdxs =", gothello.RIGHT_SIDE_INDICES)
+}
+
+func TestEdgeIndices(t *testing.T) {
+	fmt.Println("upEdgeIdxs =", gothello.UP_EDGE_INDICES)
+	fmt.Println("downEdgeIdxs =", gothello.DOWN_EDGE_INDICES)
+	fmt.Println("leftSideIdxs =", gothello.LEFT_EDGE_INDICES)
+	fmt.Println("rightSideIdxs =", gothello.RIGHT_EDGE_INDICES)
 }
 
 func TestAdjacentBySingleBitBoard(t *testing.T) {

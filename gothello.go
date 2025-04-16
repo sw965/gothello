@@ -51,6 +51,11 @@ var (
 		}
 		return idxs
 	}()
+
+	UP_EDGE_INDICES = UP_SIDE_INDICES[1:7]
+	DOWN_EDGE_INDICES = DOWN_SIDE_INDICES[1:7]
+	LEFT_EDGE_INDICES = LEFT_SIDE_INDICES[1:7]
+	RIGHT_EDGE_INDICES = RIGHT_SIDE_INDICES[1:7]
 )
 
 func IndexToRowAndColumn(idx int) (int, int) {
