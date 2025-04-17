@@ -2,7 +2,9 @@ package gothello
 
 import (
 	"math/bits"
+	"math/rand"
 	"golang.org/x/exp/slices"
+	omwrand "github.com/sw965/omw/math/rand"
 )
 
 const (
@@ -555,6 +557,21 @@ func NewInitState() State {
 	black := BitBoard(0b00000000_00000000_00000000_00010000_00001000_00000000_00000000_00000000)
 	white := BitBoard(0b00000000_00000000_00000000_00001000_00010000_00000000_00000000_00000000)
 	return State{Black:black, White:white, Hand:BLACK}
+}
+
+func NewRandState(probBlack, probWhite float64, r *rand.Rand) State {
+	var black, white BitBoard
+	for _, single := range SINGLE_BIT_BOARDS {
+		a := r.Float64()
+		switch {
+		case a < probBlack:
+			black |= single
+		case a < probBlack+probWhite:
+			white |= single
+		}
+	}
+	hand := omwrand.Choice([]int{BLACK, WHITE}, r)
+	return State{Black: black, White: white, Hand: hand}
 }
 
 func (s *State) SpaceBitBoard() BitBoard {

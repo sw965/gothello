@@ -3,6 +3,7 @@ package gothello_test
 import (
 	"testing"
 	"fmt"
+	"math/bits"
 	"github.com/sw965/gothello"
 	omwrand "github.com/sw965/omw/math/rand"
 )
@@ -17,8 +18,8 @@ func TestSideIndices(t *testing.T) {
 func TestEdgeIndices(t *testing.T) {
 	fmt.Println("upEdgeIdxs =", gothello.UP_EDGE_INDICES)
 	fmt.Println("downEdgeIdxs =", gothello.DOWN_EDGE_INDICES)
-	fmt.Println("leftSideIdxs =", gothello.LEFT_EDGE_INDICES)
-	fmt.Println("rightSideIdxs =", gothello.RIGHT_EDGE_INDICES)
+	fmt.Println("leftEdgeIdxs =", gothello.LEFT_EDGE_INDICES)
+	fmt.Println("rightEdgeIdxs =", gothello.RIGHT_EDGE_INDICES)
 }
 
 func TestAdjacentBySingleBitBoard(t *testing.T) {
@@ -27,6 +28,31 @@ func TestAdjacentBySingleBitBoard(t *testing.T) {
 		fmt.Println(v.ToArray())
 		fmt.Println("")
 	}
+}
+
+func TestNewRandState(t *testing.T) {
+	testNum := 12800
+	r := omwrand.NewMt19937()
+	blackSum := 0
+	whiteSum := 0
+	spaceSum := 0
+	for i := 0; i < testNum; i++ {
+		state := gothello.NewRandState(0.50, 0.25, r)
+		if bits.OnesCount64(uint64(state.Black&gothello.UP_SIDE_BIT_BOARD)) == 8 {
+			fmt.Println("終わり", i, state.Black.ToArray())
+			fmt.Println(state.White.ToArray())
+			break
+		}
+		blackCount := bits.OnesCount64(uint64(state.Black))
+		blackSum += blackCount
+		whiteCount := bits.OnesCount64(uint64(state.White))
+		whiteSum += whiteCount
+		spaceCount := bits.OnesCount64(uint64(state.SpaceBitBoard()))
+		spaceSum += spaceCount
+	}
+	fmt.Println(float64(blackSum) / float64(testNum))
+	fmt.Println(float64(whiteSum) / float64(testNum))
+	fmt.Println(float64(spaceSum) / float64(testNum))
 }
 
 func TestPut(t *testing.T) {
