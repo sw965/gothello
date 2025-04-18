@@ -607,6 +607,10 @@ func (s State) Put(move BitBoard) State {
 	}
 
 	flips := self.FlipBitBoard(opponent, move)
+	if flips == 0 {
+		panic("非合法の手を打とうとした。")
+	}
+
 	//石を置いて、ひっくり返す。
 	self |= move | flips
 	//ひっくり返される石を消す。
