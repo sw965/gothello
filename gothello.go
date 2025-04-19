@@ -22,10 +22,10 @@ const (
 )
 
 const (
-	UP_LEFT_X_INDEX = 8
-	UP_RIGHT_X_INDEX = 13
-	DOWN_LEFT_X_INDEX = 49
-	DOWN_RIGHT_X_INDEX = 55
+    UP_LEFT_X_INDEX  = 9
+    UP_RIGHT_X_INDEX = 14
+    DOWN_LEFT_X_INDEX = 49
+    DOWN_RIGHT_X_INDEX = 54
 )
 
 var (
