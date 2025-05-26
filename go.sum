@@ -1,6 +1,8 @@
 github.com/seehuhn/mt19937 v1.0.0 h1:r02DuVkQXfohssWZO8L/TeAlYOah7aNNubEHB/7Vtfs=
 github.com/seehuhn/mt19937 v1.0.0/go.mod h1:RikyXajNu+1Gqxm4hOacc3ckyWRd0usF6IkE3gnEcAM=
-github.com/sw965/omw v0.0.0-20250309073823-2d3c03a839b2 h1:aC4mQ8qWIQbHuyj650ZEBokZl7RUkvebs8eEooWWO+k=
-github.com/sw965/omw v0.0.0-20250309073823-2d3c03a839b2/go.mod h1:HGNGKO3ydtwQLWNv4dlq/BloxiBZ5KH+sjTdx8ZACz8=
-golang.org/x/exp v0.0.0-20230118134722-a68e582fa157 h1:fiNkyhJPUvxbRPbCqY/D9qdjmPzfHcpK3P4bM4gioSY=
-golang.org/x/exp v0.0.0-20230118134722-a68e582fa157/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=
+github.com/sw965/crow v0.0.0-20250526151639-7b353b5914a3 h1:nBto0Sgd7uD9WvFemEb8k5Chhy1AYDagOFbf2ER+dgY=
+github.com/sw965/crow v0.0.0-20250526151639-7b353b5914a3/go.mod h1:5DRGBXuUya9iWhNRtcrWW950Sqr2d0ITKinbAXKnvDg=
+github.com/sw965/omw v0.0.0-20250508094935-a74f9be50ec0 h1:rLI9+DGWY/MVXsMr9W2kZl47n+UIiGfr3BUgeeFHYUw=
+github.com/sw965/omw v0.0.0-20250508094935-a74f9be50ec0/go.mod h1:/7GBAX/erawKf64WrK0Urbb/ih3IhwnTd75+E0vRiLc=
+golang.org/x/exp v0.0.0-20230321023759-10a507213a29 h1:ooxPy7fPvB4kwsA2h+iBNHkAbp/4JxTSwCmvdjEYmug=
+golang.org/x/exp v0.0.0-20230321023759-10a507213a29/go.mod h1:CxIveKay+FTh1D0yPZemJVgC/95VzuuOLq5Qi4xnoYc=

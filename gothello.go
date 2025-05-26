@@ -1,10 +1,9 @@
 package gothello
 
 import (
+	"fmt"
 	"math/bits"
-	"math/rand"
-	"golang.org/x/exp/slices"
-	omwrand "github.com/sw965/omw/math/rand"
+	"slices"
 )
 
 const (
@@ -227,21 +226,25 @@ func (bb BitBoard) Rotate270() BitBoard {
 	return bb
 }
 
+func (bb BitBoard) Count() int {
+	return bits.OnesCount64(uint64(bb))
+}
+
 func (bb BitBoard) OneIndices() []int {
-	ui64 := uint64(bb)
-	idxs := make([]int, 0, bits.OnesCount64(ui64))
-	for ui64 != 0 {
+	b := uint64(bb)
+	idxs := make([]int, 0, bits.OnesCount64(b))
+	for b != 0 {
 		// 最下位の1ビットの位置を求める
-		idx := bits.TrailingZeros64(ui64)
+		idx := bits.TrailingZeros64(b)
 		idxs = append(idxs, idx)
 		// 最下位の1ビットをクリア
-		ui64 &= ui64 - 1
+		b &= b - 1
 	}
 	return idxs
 }
 
 func (bb BitBoard) ToSingles() BitBoards {
-	count := bits.OnesCount64(uint64(bb))
+	count := bb.Count()
 	singles := make(BitBoards, 0, count)
 	for bb != 0 {
 		// 最下位の1ビットを抽出
@@ -536,8 +539,6 @@ func ShiftDownLeft(bb BitBoard) BitBoard {
 
 type BitBoards []BitBoard
 
-var SINGLE_BIT_BOARDS = BitBoard(0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111).ToSingles()
-
 var GROUP_BIT_BOARDS = BitBoards{
 	CORNER_BIT_BOARD,
 	C_BIT_BOARD,
@@ -551,37 +552,34 @@ var GROUP_BIT_BOARDS = BitBoards{
 	0b00000000_00000000_00000000_00011000_00011000_00000000_00000000_00000000,
 }
 
+type Color int
+
 const (
-	EMPTY = 0
-	BLACK = 1
-	WHITE = 2
+	EMPTY Color = iota
+	BLACK
+	WHITE
 )
+
+func (c Color) Opposite() Color {
+	switch c {
+	case BLACK:
+		return WHITE
+	case WHITE:
+		return BLACK
+	}
+	return EMPTY
+}
 
 type State struct {
 	Black BitBoard
 	White BitBoard
-	Hand int
+	Hand  Color
 }
 
 func NewInitState() State {
 	black := BitBoard(0b00000000_00000000_00000000_00010000_00001000_00000000_00000000_00000000)
 	white := BitBoard(0b00000000_00000000_00000000_00001000_00010000_00000000_00000000_00000000)
 	return State{Black:black, White:white, Hand:BLACK}
-}
-
-func NewRandState(probBlack, probWhite float64, r *rand.Rand) State {
-	var black, white BitBoard
-	for _, single := range SINGLE_BIT_BOARDS {
-		a := r.Float64()
-		switch {
-		case a < probBlack:
-			black |= single
-		case a < probBlack+probWhite:
-			white |= single
-		}
-	}
-	hand := omwrand.Choice([]int{BLACK, WHITE}, r)
-	return State{Black: black, White: white, Hand: hand}
 }
 
 func (s *State) SpaceBitBoard() BitBoard {
@@ -604,7 +602,7 @@ func (s *State) NewHandPairBitBoard() HandPairBitBoard {
 	}
 }
 
-func (s State) Put(move BitBoard) State {
+func (s State) Put(move BitBoard) (State, error) {
 	var self BitBoard
 	var opponent BitBoard
 
@@ -618,7 +616,7 @@ func (s State) Put(move BitBoard) State {
 
 	flips := self.FlipBitBoard(opponent, move)
 	if flips == 0 {
-		panic("非合法の手を打とうとした。")
+		return State{}, fmt.Errorf("非合法の手を打とうとした。")
 	}
 
 	//石を置いて、ひっくり返す。
@@ -635,9 +633,9 @@ func (s State) Put(move BitBoard) State {
 	}
 
 	if opponent.LegalBitBoard(self) != 0 {
-		s.Hand = map[int]int{BLACK:WHITE, WHITE:BLACK}[s.Hand]
+		s.Hand = s.Hand.Opposite()
 	}
-	return s
+	return s, nil
 }
 
 func (s *State) ToString() string {
@@ -858,9 +856,9 @@ type Cell struct {
 }
 
 func (c *Cell) ToBitBoard() BitBoard {
-	ccs := []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+	cs := []string{"a", "b", "c", "d", "e", "f", "g", "h"}
 	row := c.Row-1
-	col := slices.Index(ccs, c.Column)
+	col := slices.Index(cs, c.Column)
 	idx := RowAndColumnToIndex(row, col)
 	return 1 << idx
 }
