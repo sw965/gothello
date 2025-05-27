@@ -8,6 +8,8 @@ import (
 	"github.com/sw965/gothello"
 	"runtime"
 	cgame "github.com/sw965/crow/game/sequential"
+	"github.com/sw965/omw/fn"
+	"slices"
 )
 
 func Test(t *testing.T) {
@@ -19,7 +21,24 @@ func Test(t *testing.T) {
 		rng := orand.NewMt19937()
 		players := gameLogic.MakePlayerByAgent()
 		players[gothello.BLACK] = gameLogic.NewRandActionPlayer(rng)
-		players[gothello.WHITE] = gameLogic.NewRandActionPlayer(rng)
+		players[gothello.WHITE] = func(state gothello.State, legals gothello.BitBoards) (gothello.BitBoard, error) {
+			corners := fn.Filter(legals, func(bb gothello.BitBoard) bool {
+				return slices.Contains(gothello.CORNER_BIT_BOARD.ToSingles(), bb)
+			})
+
+			if len(corners) != 0 {
+				return orand.Choice(corners, rng), nil
+			}
+
+			notXs := fn.Filter(legals, func(bb gothello.BitBoard) bool {
+				return !slices.Contains(gothello.X_BIT_BOARD.ToSingles(), bb)
+			})
+
+			if len(notXs) != 0 {
+				return orand.Choice(notXs, rng), nil
+			}
+			return orand.Choice(legals, rng), nil
+		}
 		playersByWorker[i] = players
 	}
 
