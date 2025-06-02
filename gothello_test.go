@@ -3,28 +3,26 @@ package gothello_test
 import (
 	"testing"
 	"fmt"
-	"math/bits"
 	"github.com/sw965/gothello"
 	omwrand "github.com/sw965/omw/math/rand"
-	game "github.com/sw965/crow/game/sequential"
 )
 
 func TestSideIndices(t *testing.T) {
-	fmt.Println("upSideIdxs =", gothello.UP_SIDE_INDICES)
-	fmt.Println("downSideIdxs =", gothello.DOWN_SIDE_INDICES)
-	fmt.Println("leftSideIdxs =", gothello.LEFT_SIDE_INDICES)
-	fmt.Println("rightSideIdxs =", gothello.RIGHT_SIDE_INDICES)
+	fmt.Println("upSideIdxs =", gothello.UpSideIndices)
+	fmt.Println("downSideIdxs =", gothello.DownSideIndices)
+	fmt.Println("leftSideIdxs =", gothello.LeftSideIndices)
+	fmt.Println("rightSideIdxs =", gothello.RightSideIndices)
 }
 
 func TestEdgeIndices(t *testing.T) {
-	fmt.Println("upEdgeIdxs =", gothello.UP_EDGE_INDICES)
-	fmt.Println("downEdgeIdxs =", gothello.DOWN_EDGE_INDICES)
-	fmt.Println("leftEdgeIdxs =", gothello.LEFT_EDGE_INDICES)
-	fmt.Println("rightEdgeIdxs =", gothello.RIGHT_EDGE_INDICES)
+	fmt.Println("upEdgeIdxs =", gothello.UpEdgeIndices)
+	fmt.Println("downEdgeIdxs =", gothello.DownEdgeIndices)
+	fmt.Println("leftEdgeIdxs =", gothello.LeftEdgeIndices)
+	fmt.Println("rightEdgeIdxs =", gothello.RightEdgeIndices)
 }
 
 func TestAdjacentBySingleBitBoard(t *testing.T) {
-	for k, v := range gothello.ADJACENT_BY_SINGLE_BIT_BOARD {
+	for k, v := range gothello.AdjacentBySingle {
 		fmt.Println(k.ToArray())
 		fmt.Println(v.ToArray())
 		fmt.Println("")
@@ -36,17 +34,21 @@ func TestPut(t *testing.T) {
 
 	//1手目
 	move1 := gothello.Cell{Row:3, Column:"e"}
-	state1 := init.Put(move1.ToBitBoard())
+	state1, err := init.Put(move1.ToBitBoard())
+	if err != nil {
+		panic(err)
+	}
+
 	legal1 := state1.LegalBitBoard()
 	expectedState1 := gothello.State{
 		Black:0b00000000_00000000_00000000_00010000_00011000_00010000_00000000_00000000,
 		White:0b00000000_00000000_00000000_00001000_00000000_00000000_00000000_00000000,
-		Hand:gothello.WHITE,
+		Hand:gothello.White,
 	}
 	expectedLegal1 := gothello.BitBoard(0b00000000_00000000_00000000_00100000_00000000_00101000_00000000_00000000)
 
 	if state1 != expectedState1 {
-		fmt.Println(state1.ToString())
+		fmt.Println(state1.ToArray())
 		t.Errorf("テスト失敗")
 	}
 
@@ -57,17 +59,21 @@ func TestPut(t *testing.T) {
 
 	//2手目
 	move2 := gothello.Cell{Row:3, Column:"f"}
-	state2 := state1.Put(move2.ToBitBoard())
+	state2, err := state1.Put(move2.ToBitBoard())
+	if err != nil {
+		panic(err)
+	}
+
 	legal2 := state2.LegalBitBoard()
 	expectedState2 := gothello.State{
 		Black:0b00000000_00000000_00000000_00010000_00001000_00010000_00000000_00000000,
 		White:0b00000000_00000000_00000000_00001000_00010000_00100000_00000000_00000000,
-		Hand:gothello.BLACK,
+		Hand:gothello.Black,
 	}
 	expectedLegal2 := gothello.BitBoard(0b00000000_00000000_00001000_00000100_00100000_01000000_00000000_00000000)
 
 	if expectedState2 != state2 {
-		fmt.Println(state2.ToString())
+		fmt.Println(state2.ToArray())
 		t.Errorf("テスト失敗")
 	}
 
@@ -78,17 +84,21 @@ func TestPut(t *testing.T) {
 
 	//3手目
 	move3 := gothello.Cell{Row:4, Column:"f"}
-	state3 := state2.Put(move3.ToBitBoard())
+	state3, err := state2.Put(move3.ToBitBoard())
+	if err != nil {
+		panic(err)
+	}
+
 	legal3 := state3.LegalBitBoard()
 	expectedState3 := gothello.State{
 		Black:0b00000000_00000000_00000000_00010000_00111000_00010000_00000000_00000000,
 		White:0b00000000_00000000_00000000_00001000_00000000_00100000_00000000_00000000,
-		Hand:gothello.WHITE,
+		Hand:gothello.White,
 	}
 	expectedLegal3 := gothello.BitBoard(0b00000000_00000000_00000000_00100000_00000000_00001000_00000000_00000000)
 
 	if expectedState3 != state3 {
-		fmt.Println(state3.ToString())
+		fmt.Println(state3.ToArray())
 		t.Errorf("テスト失敗")
 	}
 
@@ -120,8 +130,15 @@ func TestFlipBitBoard(t *testing.T) {
 			}
 
 			//ランダムに手を選択する。
-			bb := omwrand.Choice(legalBitBoards, r)
-			state = state.Put(bb)
+			bb, err := omwrand.Choice(legalBitBoards, r)
+			if err != nil {
+				panic(err)
+			}
+
+			state, err = state.Put(bb)
+			if err != nil {
+				panic(err)
+			}
 
 			//両プレイヤーの合法手がなくなった場合、ゲームが終了する。
 			black := state.Black.LegalBitBoard(state.White)

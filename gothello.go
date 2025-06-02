@@ -7,139 +7,44 @@ import (
 )
 
 const (
-	ROW = 8
-	COLUMN = 8
-	SIDE_SIZE = 8
-	BOARD_SIZE = ROW * COLUMN
+	Rows = 8
+	Cols = 8
+	BoardSize = Rows * Cols
 )
-
-const (
-	UP_LEFT_CORNER_INDEX = 0
-	UP_RIGHT_CORNER_INDEX = 7
-	DOWN_LEFT_CORNER_INDEX = 56
-	DOWN_RIGHT_CORNER_INDEX = 63
-)
-
-const (
-    UP_LEFT_X_INDEX  = 9
-    UP_RIGHT_X_INDEX = 14
-    DOWN_LEFT_X_INDEX = 49
-    DOWN_RIGHT_X_INDEX = 54
-)
-
-var (
-	UP_SIDE_INDICES = func() []int {
-		idxs := make([]int, COLUMN)
-		for i := range idxs {
-			idxs[i] = i
-		}
-		return idxs
-	}()
-
-	DOWN_SIDE_INDICES = func() []int {
-		idxs := make([]int, COLUMN)
-		for i := range idxs {
-			idxs[i] = DOWN_LEFT_CORNER_INDEX + i
-		}
-		return idxs
-	}()
-
-	LEFT_SIDE_INDICES = func() []int {
-		idxs := make([]int, ROW)
-		for i := range idxs {
-			idxs[i] = i * COLUMN
-		}
-		return idxs
-	}()
-
-	RIGHT_SIDE_INDICES = func() []int {
-		idxs := make([]int, ROW)
-		for i := range idxs {
-			idxs[i] = UP_RIGHT_CORNER_INDEX + (i * COLUMN)
-		}
-		return idxs
-	}()
-
-	UP_EDGE_INDICES = UP_SIDE_INDICES[1:7]
-	DOWN_EDGE_INDICES = DOWN_SIDE_INDICES[1:7]
-	LEFT_EDGE_INDICES = LEFT_SIDE_INDICES[1:7]
-	RIGHT_EDGE_INDICES = RIGHT_SIDE_INDICES[1:7]
-)
-
-func IndexToRowAndColumn(idx int) (int, int) {
-	return idx/COLUMN, idx%COLUMN
-}
-
-func RowAndColumnToIndex(row, col int) int {
-	return row * COLUMN + col
-}
-
-func MirrorHorizontalIndex(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newCol := (COLUMN - 1) - col
-	return row*COLUMN + newCol
-}
-
-func MirrorVerticalIndex(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := (ROW - 1) - row
-	return newRow*COLUMN + col
-}
-
-func Rotate90Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := col
-	newCol := (ROW - 1) - row
-	return newRow*COLUMN + newCol
-}
-
-func Rotate180Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := (ROW - 1) - row
-	newCol := (COLUMN - 1) - col
-	return newRow*COLUMN + newCol
-}
-
-func Rotate270Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
-	newRow := (COLUMN - 1) - col
-	newCol := row
-	return newRow*COLUMN + newCol
-}
 
 type BitBoard uint64
 
 const (
-	UP_EDGE_BIT_BOARD    = BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_01111110)
-	DOWN_EDGE_BIT_BOARD  = BitBoard(0b01111110_00000000_00000000_00000000_00000000_00000000_00000000_00000000)
-	LEFT_EDGE_BIT_BOARD  = BitBoard(0b00000000_00000001_00000001_00000001_00000001_00000001_00000001_00000000)
-	RIGHT_EDGE_BIT_BOARD = BitBoard(0b00000000_10000000_10000000_10000000_10000000_10000000_10000000_00000000)
+	UpEdgeBitBoard    = BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_01111110)
+	DownEdgeBitBoard  = BitBoard(0b01111110_00000000_00000000_00000000_00000000_00000000_00000000_00000000)
+	LeftEdgeBitBoard  = BitBoard(0b00000000_00000001_00000001_00000001_00000001_00000001_00000001_00000000)
+	RightEdgeBitBoard = BitBoard(0b00000000_10000000_10000000_10000000_10000000_10000000_10000000_00000000)
 
-	UP_SIDE_BIT_BOARD    = BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_11111111)
-	DOWN_SIDE_BIT_BOARD  = BitBoard(0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000)
-	LEFT_SIDE_BIT_BOARD  = BitBoard(0b00000001_00000001_00000001_00000001_00000001_00000001_00000001_00000001)
-	RIGHT_SIDE_BIT_BOARD = BitBoard(0b10000000_10000000_10000000_10000000_10000000_10000000_10000000_10000000)
-	SIDE_BIT_BOARD       = BitBoard(0b11111111_10000001_10000001_10000001_10000001_10000001_10000001_11111111)
+	UpSideBitBoard    = BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_11111111)
+	DownSideBitBoard  = BitBoard(0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000)
+	LeftSideBitBoard  = BitBoard(0b00000001_00000001_00000001_00000001_00000001_00000001_00000001_00000001)
+	RightSideBitBoard = BitBoard(0b10000000_10000000_10000000_10000000_10000000_10000000_10000000_10000000)
+	SideBitBoard      = BitBoard(0b11111111_10000001_10000001_10000001_10000001_10000001_10000001_11111111)
 
-	CORNER_BIT_BOARD = BitBoard(0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001)
-	C_BIT_BOARD      = BitBoard(0b01000010_10000001_00000000_00000000_00000000_00000000_10000001_01000010)
-	A_BIT_BOARD      = BitBoard(0b00100100_00000000_10000001_00000000_00000000_10000001_00000000_00100100)
-	B_BIT_BOARD      = BitBoard(0b00011000_00000000_00000000_10000001_10000001_00000000_00000000_00011000)
-	X_BIT_BOARD      = BitBoard(0b00000000_01000010_00000000_00000000_00000000_00000000_01000010_00000000)
+	CornerBitBoard = BitBoard(0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001)
+	CBitBoard      = BitBoard(0b01000010_10000001_00000000_00000000_00000000_00000000_10000001_01000010)
+	ABitBoard      = BitBoard(0b00100100_00000000_10000001_00000000_00000000_10000001_00000000_00100100)
+	BBitBoard      = BitBoard(0b00011000_00000000_00000000_10000001_10000001_00000000_00000000_00011000)
+	XBitBoard      = BitBoard(0b00000000_01000010_00000000_00000000_00000000_00000000_01000010_00000000)
 
-	WHITE_LINE_BIT_BOARD = BitBoard(0b10000000_01000000_00100000_00010000_00001000_00000100_00000010_00000001)
-	BLACK_LINE_BIT_BOARD = BitBoard(0b00000001_00000010_00000100_00001000_00010000_00100000_01000000_10000000)
+	WhiteLineBitBoard = BitBoard(0b10000000_01000000_00100000_00010000_00001000_00000100_00000010_00000001)
+	BlackLineBitBoard = BitBoard(0b00000001_00000010_00000100_00001000_00010000_00100000_01000000_10000000)
 )
 
-var ADJACENT_BY_SINGLE_BIT_BOARD = func() map[BitBoard]BitBoard {
+var AdjacentBySingle = func() map[BitBoard]BitBoard {
 	m := map[BitBoard]BitBoard{}
-	for i := 0; i < BOARD_SIZE; i++ {
+	for i := 0; i < BoardSize; i++ {
 		single := BitBoard(1) << i
 		var adj BitBoard = 0
 		row, col := IndexToRowAndColumn(i)
 
 		// 右端でなければ右方向へ
-		if col < COLUMN-1 {
+		if col < Cols-1 {
 			adj |= ShiftRight(single)
 		}
 		// 左端でなければ左方向へ
@@ -151,11 +56,11 @@ var ADJACENT_BY_SINGLE_BIT_BOARD = func() map[BitBoard]BitBoard {
 			adj |= ShiftUp(single)
 		}
 		// 下端でなければ下方向へ
-		if row < ROW-1 {
+		if row < Rows-1 {
 			adj |= ShiftDown(single)
 		}
 		// 右上方向
-		if row > 0 && col < COLUMN-1 {
+		if row > 0 && col < Cols-1 {
 			adj |= ShiftUpRight(single)
 		}
 		// 左上方向
@@ -163,11 +68,11 @@ var ADJACENT_BY_SINGLE_BIT_BOARD = func() map[BitBoard]BitBoard {
 			adj |= ShiftUpLeft(single)
 		}
 		// 右下方向
-		if row < ROW-1 && col < COLUMN-1 {
+		if row < Rows-1 && col < Cols-1 {
 			adj |= ShiftDownRight(single)
 		}
 		// 左下方向
-		if row < ROW-1 && col > 0 {
+		if row < Rows-1 && col > 0 {
 			adj |= ShiftDownLeft(single)
 		}
 		m[single] = adj
@@ -243,9 +148,9 @@ func (bb BitBoard) OneIndices() []int {
 	return idxs
 }
 
-func (bb BitBoard) ToSingles() BitBoards {
+func (bb BitBoard) ToSingles() []BitBoard {
 	count := bb.Count()
-	singles := make(BitBoards, 0, count)
+	singles := make([]BitBoard, 0, count)
 	for bb != 0 {
 		// 最下位の1ビットを抽出
 		lsb := bb & -bb
@@ -260,8 +165,8 @@ func (bb BitBoard) ToSingles() BitBoards {
 	https://blog.qmainconts.dev/articles/yxiplk2_dd
 	https://qiita.com/sensuikan1973/items/459b3e11d91f3cb37e43
 	上記の参考文献では、最上位ビットを(0, 0)の地点と見なしているが、
-	このライブラリでは、(0, 0)の地点を最下位ビットと見なしている。
-	なので、左シフトと右シフトの役割が逆になっている。
+	このライブラリでは、(0, 0)の地点を最下位ビットと見なしている為、
+	左シフトと右シフトの役割が逆になっている。
 */
 func (bb BitBoard) LegalBitBoard(opponent BitBoard) BitBoard {
 	/*
@@ -492,9 +397,9 @@ func (bb BitBoard) FlipBitBoard(opponent, move BitBoard) BitBoard {
 	return flips
 }
 
-func (bb BitBoard) ToArray() [ROW][COLUMN]int {
-	var arr [ROW][COLUMN]int
-	for i := 0; i < BOARD_SIZE; i++ {
+func (bb BitBoard) ToArray() [Rows][Cols]int {
+	var arr [Rows][Cols]int
+	for i := 0; i < BoardSize; i++ {
 		row, col := IndexToRowAndColumn(i)
 		if bb&(1<<i) != 0 {
 			arr[row][col] = 1
@@ -537,14 +442,12 @@ func ShiftDownLeft(bb BitBoard) BitBoard {
 	return bb << 7
 }
 
-type BitBoards []BitBoard
-
-var GROUP_BIT_BOARDS = BitBoards{
-	CORNER_BIT_BOARD,
-	C_BIT_BOARD,
-	A_BIT_BOARD,
-	B_BIT_BOARD,
-	X_BIT_BOARD,
+var GroupBitBoards = []BitBoard{
+	CornerBitBoard,
+	CBitBoard,
+	ABitBoard,
+	BBitBoard,
+	XBitBoard,
 	0b00000000_00100100_01000010_00000000_00000000_01000010_00100100_00000000,
 	0b00000000_00011000_00000000_01000010_01000010_00000000_00011000_00000000,
 	0b00000000_00000000_00100100_00000000_00000000_00100100_00000000_00000000,
@@ -555,19 +458,19 @@ var GROUP_BIT_BOARDS = BitBoards{
 type Color int
 
 const (
-	EMPTY Color = iota
-	BLACK
-	WHITE
+	Empty Color = iota
+	Black
+	White
 )
 
 func (c Color) Opposite() Color {
 	switch c {
-	case BLACK:
-		return WHITE
-	case WHITE:
-		return BLACK
+	case Black:
+		return White
+	case White:
+		return Black
 	}
-	return EMPTY
+	return Empty
 }
 
 type State struct {
@@ -579,23 +482,23 @@ type State struct {
 func NewInitState() State {
 	black := BitBoard(0b00000000_00000000_00000000_00010000_00001000_00000000_00000000_00000000)
 	white := BitBoard(0b00000000_00000000_00000000_00001000_00010000_00000000_00000000_00000000)
-	return State{Black:black, White:white, Hand:BLACK}
+	return State{Black:black, White:white, Hand:Black}
 }
 
-func (s *State) SpaceBitBoard() BitBoard {
+func (s State) SpaceBitBoard() BitBoard {
 	return ^(s.Black | s.White)
 }
 
-func (s *State) LegalBitBoard() BitBoard {
-	if s.Hand == BLACK {
+func (s State) LegalBitBoard() BitBoard {
+	if s.Hand == Black {
 		return s.Black.LegalBitBoard(s.White)
 	} else {
 		return s.White.LegalBitBoard(s.Black)
 	}
 }
 
-func (s *State) NewHandPairBitBoard() HandPairBitBoard {
-	if s.Hand == BLACK {
+func (s State) NewHandPairBitBoard() HandPairBitBoard {
+	if s.Hand == Black {
 		return HandPairBitBoard{Self:s.Black, Opponent:s.White}
 	} else {
 		return HandPairBitBoard{Self:s.White, Opponent:s.Black}
@@ -606,7 +509,7 @@ func (s State) Put(move BitBoard) (State, error) {
 	var self BitBoard
 	var opponent BitBoard
 
-	if s.Hand == BLACK {
+	if s.Hand == Black {
 		self = s.Black
 		opponent = s.White
 	} else {
@@ -624,7 +527,7 @@ func (s State) Put(move BitBoard) (State, error) {
 	//ひっくり返される石を消す。
 	opponent &^= flips
 
-	if s.Hand == BLACK {
+	if s.Hand == Black {
 		s.Black = self
 		s.White = opponent
 	} else {
@@ -636,41 +539,6 @@ func (s State) Put(move BitBoard) (State, error) {
 		s.Hand = s.Hand.Opposite()
 	}
 	return s, nil
-}
-
-func (s *State) ToString() string {
-	blackArr := s.Black.ToArray()
-	whiteArr := s.White.ToArray()
-	legalArr := s.LegalBitBoard().ToArray()
-	str := ""
-
-	for row := 0; row < ROW; row++ {
-		for col := 0; col < COLUMN; col++ {
-			var mark string
-			if blackArr[row][col] == 1 {
-				mark = "b"
-			} else if whiteArr[row][col] == 1 {
-				mark = "w"
-			} else if legalArr[row][col] == 1 {
-				mark = "p"
-			} else {
-				mark = "-"
-			}
-
-			if col != COLUMN-1 {
-				mark += " "
-			}
-			str += mark
-		}
-		str += "\n"
-	}
-
-	if s.Hand == BLACK {
-		str += "hand = black\n"
-	} else {
-		str += "hand = white\n"
-	}
-	return str
 }
 
 func (s State) MirrorHorizontal() State {
@@ -703,12 +571,66 @@ func (s State) Rotate270() State {
 	return s
 }
 
+func (s State) ToArray() ([][]int, error) {
+	bArr := s.Black.ToArray()
+	wArr := s.White.ToArray()
+
+	arr := make([][]int, Rows)
+	for i := range arr {
+		arr[i] = make([]int, Cols)
+	}
+
+	for i := range arr {
+		for j := range arr[i] {
+			be := bArr[i][j]
+			we := wArr[i][j]
+			if be == 1 && we == 1 {
+				return nil, fmt.Errorf("(%d, %d) 地点に黒石と白石の両方にビットが入力されている。", i, j)
+			}
+
+			if be == 1 {
+				arr[i][j] = 1
+			}
+			
+			if we == 1 {
+				arr[i][j] = 2
+			}
+		}
+	}
+	return arr, nil
+}
+
+type States []State
+
+func (ss States) CountResult() (ResultCounter, error) {
+	counter := ResultCounter{}
+	for _, s := range ss {
+		blackLegal := s.Black.LegalBitBoard(s.White)
+		whiteLegal := s.White.LegalBitBoard(s.Black)
+
+		if blackLegal != 0 || whiteLegal != 0 {
+			return ResultCounter{}, fmt.Errorf("ゲームが終了していない為、カウント出来ない。")
+		}
+
+		blackCount := s.Black.Count()
+		whiteCount := s.White.Count()
+		if blackCount > whiteCount {
+			counter.BlackWin++
+		} else if blackCount < whiteCount {
+			counter.WhiteWin++
+		} else {
+			counter.Draw++
+		}
+	}
+	return counter, nil
+}
+
 type ColorPairBitBoard struct {
 	Black BitBoard
 	White BitBoard
 }
 
-func (cp *ColorPairBitBoard) SpaceBitBoard() BitBoard {
+func (cp ColorPairBitBoard) SpaceBitBoard() BitBoard {
 	return ^(cp.Black | cp.White)
 }
 
@@ -742,37 +664,12 @@ func (cp ColorPairBitBoard) Rotate270() ColorPairBitBoard {
 	return cp
 }
 
-func (cp *ColorPairBitBoard) ToString() string {
-	blackArr := cp.Black.ToArray()
-	whiteArr := cp.White.ToArray()
-	str := ""
-
-	for row := 0; row < ROW; row++ {
-		for col := 0; col < COLUMN; col++ {
-			var mark string
-			if blackArr[row][col] == 1 {
-				mark = "b"
-			} else if whiteArr[row][col] == 1 {
-				mark = "w"
-			} else {
-				mark = "-"
-			}
-			if col != COLUMN-1 {
-				mark += " "
-			}
-			str += mark
-		}
-		str += "\n"
-	}
-	return str
-}
-
 type HandPairBitBoard struct {
 	Self     BitBoard
 	Opponent BitBoard
 }
 
-func (hp *HandPairBitBoard) SpaceBitBoard() BitBoard {
+func (hp HandPairBitBoard) SpaceBitBoard() BitBoard {
 	return ^(hp.Self | hp.Opponent)
 }
 
@@ -806,48 +703,31 @@ func (hp HandPairBitBoard) Rotate270() HandPairBitBoard {
 	return hp
 }
 
-func (hp *HandPairBitBoard) ToArray() [][]int {
+func (hp HandPairBitBoard) ToArray() ([][]int, error) {
 	selfArr := hp.Self.ToArray()
 	oppArr := hp.Opponent.ToArray()
-	arr := make([][]int, ROW)
+	arr := make([][]int, Rows)
 	for i := range arr {
-		arr[i] = make([]int, COLUMN)
+		arr[i] = make([]int, Cols)
 	}
 	for i := range arr {
 		for j := range arr[i] {
-			if selfArr[i][j] == 1 {
+			se := selfArr[i][j]
+			oe := oppArr[i][j]
+			if se == 1 && oe == 1 {
+				return nil, fmt.Errorf("(%d, %d) 地点に自分の石と相手の石の両方にビットが入力されている。", i, j)
+			}
+
+			if se == 1 {
 				arr[i][j] = 1
-			} else if oppArr[i][j] == 1 {
+			}
+			
+			if oe == 1 {
 				arr[i][j] = 2
 			}
 		}
 	}
-	return arr
-}
-
-func (hp *HandPairBitBoard) ToString() string {
-	selfArr := hp.Self.ToArray()
-	oppArr := hp.Opponent.ToArray()
-	str := ""
-
-	for i := 0; i < BOARD_SIZE; i++ {
-		row, col := IndexToRowAndColumn(i)
-		var mark string
-		if selfArr[row][col] == 1 {
-			mark = "s"
-		} else if oppArr[row][col] == 1 {
-			mark = "o"
-		} else {
-			mark = "-"
-		}
-		if col != COLUMN-1 {
-			mark += " "
-		}
-		str += mark
-	}
-
-	str += "\n"
-	return str
+	return arr, nil
 }
 
 type Cell struct {
@@ -861,4 +741,46 @@ func (c *Cell) ToBitBoard() BitBoard {
 	col := slices.Index(cs, c.Column)
 	idx := RowAndColumnToIndex(row, col)
 	return 1 << idx
+}
+
+type ResultCounter struct {
+	BlackWin int
+	WhiteWin int
+	Draw     int
+}
+
+func (r ResultCounter) Total() int {
+	return r.BlackWin + r.WhiteWin + r.Draw
+}
+
+func (r ResultCounter) TotalWin() int {
+	return r.BlackWin + r.WhiteWin
+}
+
+func (r ResultCounter) BlackWinRate(includeDraws bool) float64 {
+	w := float64(r.BlackWin)
+	if includeDraws {
+		n := float64(r.Total())
+		d := float64(r.Draw)
+		return (w + (0.5 * d)) / n
+	}
+	n := float64(r.TotalWin())
+	return w / float64(n)
+}
+
+func (r ResultCounter) WhiteWinRate(includeDraws bool) float64 {
+	w := float64(r.WhiteWin)
+	if includeDraws {
+		n := float64(r.Total())
+		d := float64(r.Draw)
+		return (w + (0.5 * d)) / n
+	}
+
+	n := float64(r.TotalWin())
+	return w / float64(n)
+}
+
+func (r ResultCounter) DrawRate() float64 {
+	n := float64(r.Total())
+	return float64(r.Draw) / n
 }

@@ -5,8 +5,8 @@ import (
 	game "github.com/sw965/crow/game/sequential"
 )
 
-func NewLogic() game.Logic[gothello.State, gothello.BitBoards, gothello.BitBoard, gothello.Color] {
-	legalActionsProvider := func(state gothello.State) gothello.BitBoards {
+func NewLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Color] {
+	legalActionsProvider := func(state gothello.State) []gothello.BitBoard {
 		return state.LegalBitBoard().ToSingles()
 	}
 
@@ -18,7 +18,7 @@ func NewLogic() game.Logic[gothello.State, gothello.BitBoards, gothello.BitBoard
 		return s1 == s2
 	}
 
-	currentTurnAgentGetter := func(state gothello.State) gothello.Color {
+	currentAgentGetter := func(state gothello.State) gothello.Color {
 		return state.Hand
 	}
 
@@ -33,14 +33,14 @@ func NewLogic() game.Logic[gothello.State, gothello.BitBoards, gothello.BitBoard
 			placements := game.PlacementByAgent[gothello.Color]{}
 
 			if blackCount > whiteCount {
-				placements[gothello.BLACK] = 1
-				placements[gothello.WHITE] = 2
+				placements[gothello.Black] = 1
+				placements[gothello.White] = 2
 			} else if blackCount < whiteCount {
-				placements[gothello.BLACK] = 2
-				placements[gothello.WHITE] = 1
+				placements[gothello.Black] = 2
+				placements[gothello.White] = 1
 			} else {
-				placements[gothello.BLACK] = 1
-				placements[gothello.WHITE] = 1
+				placements[gothello.Black] = 1
+				placements[gothello.White] = 1
 			}
 			return placements, nil
 		}
@@ -49,11 +49,11 @@ func NewLogic() game.Logic[gothello.State, gothello.BitBoards, gothello.BitBoard
 		return nil, nil
 	}
 
-	logic := game.Logic[gothello.State, gothello.BitBoards, gothello.BitBoard, gothello.Color]{
+	logic := game.Logic[gothello.State, gothello.BitBoard, gothello.Color]{
 		LegalActionsProvider:legalActionsProvider,
 		Transitioner:transitioner,
 		Comparator:comparator,
-		CurrentTurnAgentGetter:currentTurnAgentGetter,
+		CurrentAgentGetter:currentAgentGetter,
 		PlacementsJudger:placementsJudger,
 	}
 
