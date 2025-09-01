@@ -1,57 +1,47 @@
 package gothello
 
+import (
+	"slices"
+	omwbits "github.com/sw965/omw/math/bits"
+)
+
 const (
-	UpLeftCornerIndex = 0
-	UpRightCornerIndex = 7
-	DownLeftCornerIndex = 56
+	UpLeftCornerIndex    = 0
+	UpRightCornerIndex   = 7
+	DownLeftCornerIndex  = 56
 	DownRightCornerIndex = 63
 )
 
-const (
-	UpLeftXIndex = 9
-	UpRightXIndex = 14
-	DownLeftXIndex = 49
-    DownRightXIndex = 54
-)
-
 var (
-	UpSideIndices = func() []int {
-		idxs := make([]int, Cols)
-		for i := range idxs {
-			idxs[i] = i
-		}
-		return idxs
-	}()
+    UpLeft16MassIndices    = omwbits.OneIndices64(UpLeftBitBoard)
+    UpRight16MassIndices   = omwbits.OneIndices64(UpRightBitBoard)
+    DownLeft16MassIndices  = omwbits.OneIndices64(DownLeftBitBoard)
+    DownRight16MassIndices = omwbits.OneIndices64(DownRightBitBoard)
 
-	DownSideIndices = func() []int {
-		idxs := make([]int, Cols)
-		for i := range idxs {
-			idxs[i] = DownLeftCornerIndex + i
-		}
-		return idxs
-	}()
+    WhiteLineIndices = omwbits.OneIndices64(WhiteLineBitBoard)
+    BlackLineIndices = omwbits.OneIndices64(BlackLineBitBoard)
 
-	LeftSideIndices = func() []int {
-		idxs := make([]int, Rows)
-		for i := range idxs {
-			idxs[i] = i * Cols
-		}
-		return idxs
-	}()
+    UpSideIndices   = omwbits.OneIndices64(UpSideBitBoard)
+    DownSideIndices = omwbits.OneIndices64(DownSideBitBoard)
+    LeftSideIndices  = omwbits.OneIndices64(LeftSideBitBoard)
+    RightSideIndices = omwbits.OneIndices64(RightSideBitBoard)
 
-	RightSideIndices = func() []int {
-		idxs := make([]int, Rows)
-		for i := range idxs {
-			idxs[i] = UpRightCornerIndex + (i * Cols)
-		}
-		return idxs
-	}()
+    UpEdgeIndices    = omwbits.OneIndices64(UpEdgeBitBoard)
+    DownEdgeIndices  = omwbits.OneIndices64(DownEdgeBitBoard)
+    LeftEdgeIndices  = omwbits.OneIndices64(LeftEdgeBitBoard)
+    RightEdgeIndices = omwbits.OneIndices64(RightEdgeBitBoard)
+    EdgeIndices      = omwbits.OneIndices64(EdgeBitBoard)
 
-	UpEdgeIndices = UpSideIndices[1:7]
-	DownEdgeIndices = DownSideIndices[1:7]
-	LeftEdgeIndices = LeftSideIndices[1:7]
-	RightEdgeIndices = RightSideIndices[1:7]
+    CornerIndices = omwbits.OneIndices64(CornerBitBoard)
+    CIndices      = omwbits.OneIndices64(CBitBoard)
+    AIndices      = omwbits.OneIndices64(ABitBoard)
+    BIndices      = omwbits.OneIndices64(BBitBoard)
+    XIndices      = omwbits.OneIndices64(XBitBoard)
 )
+
+func IsCornerIndex(idx int) bool {
+	return slices.Contains(CornerIndices, idx)
+}
 
 func IndexToRowAndColumn(idx int) (int, int) {
 	return idx/Cols, idx%Cols
@@ -59,6 +49,11 @@ func IndexToRowAndColumn(idx int) (int, int) {
 
 func RowAndColumnToIndex(row, col int) int {
 	return row * Cols + col
+}
+
+func TransposeIndex(idx int) int {
+    row, col := idx/Cols, idx%Cols
+    return col*Cols + row
 }
 
 func MirrorHorizontalIndex(idx int) int {
@@ -106,3 +101,13 @@ var GroupIndexTable = [][]int{
 	[]int{19, 20, 26, 29, 34, 37, 43, 44},
 	[]int{27, 28, 35, 36},
 }
+
+var GroupIdByIndex = func() []int {
+	groupIds := make([]int, BoardSize)
+	for id, gropuIdxs := range GroupIndexTable {
+		for _, idx := range gropuIdxs {
+			groupIds[idx] = id
+		}
+	}
+	return groupIds
+}()

@@ -7,7 +7,7 @@ import (
 	"github.com/sw965/gothello/game"
 	"github.com/sw965/gothello"
 	"runtime"
-	"github.com/sw965/omw/fn"
+	"github.com/sw965/omw/funcs"
 	"slices"
 	"math/rand"
 	cgame "github.com/sw965/crow/game/sequential"
@@ -32,7 +32,7 @@ func Test(t *testing.T) {
 			return m
 		}
 
-		corners := fn.Filter(legals, func(bb gothello.BitBoard) bool {
+		corners := funcs.Filter(legals, func(bb gothello.BitBoard) bool {
 			return slices.Contains(gothello.CornerBitBoard.ToSingles(), bb)
 		})
 
@@ -49,7 +49,7 @@ func Test(t *testing.T) {
 			return m
 		}
 
-		notXs := fn.Filter(legals, func(bb gothello.BitBoard) bool {
+		notXs := funcs.Filter(legals, func(bb gothello.BitBoard) bool {
 			return !slices.Contains(gothello.XBitBoard.ToSingles(), bb)
 		})
 

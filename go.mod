@@ -5,8 +5,8 @@ go 1.24.2
 toolchain go1.24.3
 
 require (
-	github.com/sw965/crow v0.0.0-20250602162236-685b998bdae1
-	github.com/sw965/omw v0.0.0-20250602153719-aeb98fb7d077
+	github.com/sw965/crow v0.0.0-20250627145604-d3d60e83bddd
+	github.com/sw965/omw v0.0.0-20250823124505-f576f3f38985
 )
 
 require (

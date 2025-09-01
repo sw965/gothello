@@ -5,7 +5,7 @@ import (
 	game "github.com/sw965/crow/game/sequential"
 )
 
-func NewLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Color] {
+func NewLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Disc] {
 	legalActionsProvider := func(state gothello.State) []gothello.BitBoard {
 		return state.LegalBitBoard().ToSingles()
 	}
@@ -18,19 +18,19 @@ func NewLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Color] {
 		return s1 == s2
 	}
 
-	currentAgentGetter := func(state gothello.State) gothello.Color {
-		return state.Hand
+	currentAgentGetter := func(state gothello.State) gothello.Disc {
+		return state.Turn
 	}
 
-	placementsJudger := func(state gothello.State) (game.PlacementByAgent[gothello.Color], error) {
+	placementsJudger := func(state gothello.State) (game.PlacementByAgent[gothello.Disc], error) {
 		blackLegal := state.Black.LegalBitBoard(state.White)
 		whiteLegal := state.White.LegalBitBoard(state.Black)
 
 		//ゲームが終了している場合
 		if blackLegal == 0 && whiteLegal == 0 {
-			blackCount := state.Black.Count()
-			whiteCount := state.White.Count()
-			placements := game.PlacementByAgent[gothello.Color]{}
+			blackCount := state.Black.OnesCount()
+			whiteCount := state.White.OnesCount()
+			placements := game.PlacementByAgent[gothello.Disc]{}
 
 			if blackCount > whiteCount {
 				placements[gothello.Black] = 1
@@ -49,12 +49,13 @@ func NewLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Color] {
 		return nil, nil
 	}
 
-	logic := game.Logic[gothello.State, gothello.BitBoard, gothello.Color]{
+	logic := game.Logic[gothello.State, gothello.BitBoard, gothello.Disc]{
 		LegalActionsProvider:legalActionsProvider,
 		Transitioner:transitioner,
 		Comparator:comparator,
 		CurrentAgentGetter:currentAgentGetter,
 		PlacementsJudger:placementsJudger,
+		Agents:[]gothello.Disc{gothello.Black, gothello.White},
 	}
 
 	logic.SetStandardResultScoresEvaluator()
