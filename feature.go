@@ -3,11 +3,33 @@ package gothello
 import (
 	"fmt"
 	omwbits "github.com/sw965/omw/math/bits"
+	omwslices "github.com/sw965/omw/slices"
 )
 
 type Feature struct {
 	Self     BitBoard
 	Opponent BitBoard
+}
+
+func NewFeatureFromIndices(selfIdxs, oppIdxs []int) (Feature, error) {
+	if !omwslices.IsMutuallyExclusive(selfIdxs, oppIdxs) {
+		return Feature{}, fmt.Errorf("self と opp は 排反でなければならない")
+	}
+
+	self, err := omwbits.New64FromIndices[BitBoard](selfIdxs)
+	if err != nil {
+		return Feature{}, err
+	}
+
+	opp, err := omwbits.New64FromIndices[BitBoard](oppIdxs)
+	if err != nil {
+		return Feature{}, err
+	}
+
+	return Feature{
+		Self:self,
+		Opponent:opp,
+	}, nil
 }
 
 func (f Feature) AndBitBoard(bb BitBoard) Feature {
@@ -104,4 +126,54 @@ func (f Feature) ToArray() ([][]Disc, error) {
 		}
 	}
 	return arr, nil
+}
+
+type PartialFeature1D []int
+
+func (b PartialFeature1D) Put(idx int) (PartialFeature1D, error) {
+	if b[idx] != Empty {
+		return nil, fmt.Errorf("空白ではない場所に置こうとした")
+	}
+
+	flipIdxs := make([]int, 0, len(b)-2)
+
+	if idx > 1 {
+		candidate := make([]int, 0, idx-2)
+		for i := idx-1; i > 0; i-- {
+			switch b[i] {
+			case 0:
+				candidate = nil
+				break
+			case 1:
+				break
+			case 2:
+				candidate = append(candidate, i)
+			}
+		}
+		for _, flipIdx := range candidate {
+			flipIdxs = append(flipIdxs, flipIdx)
+		}
+	}
+
+	boardN := len(b)
+	rightFlipIdxs := make([]int, 0, len(b)-2)
+
+	if idx <= boardN-2 {
+		right = b[i+1:]
+		flips := make(PartialBoard1D, 0, len(right)-1)
+		for j := idx+1; j < boardN; j++ {
+			case 0:
+				flips = nil
+				break
+			case 1:
+				break
+			case 2:
+				flips = append(flips, j)
+		}
+
+		for _, flipIdx := range flips {
+			right[flipIdx] = 1
+		}
+	}
+	return nil, nil
 }

@@ -12,6 +12,13 @@ const (
 	DownRightCornerIndex = 63
 )
 
+const (
+	UpLeftXIndex   = 9
+	UpRightXIndex  = 14
+	DownLeftXIndex = 49
+	DownRightXIndex = 54
+)
+
 var (
     UpLeft16MassIndices    = omwbits.OneIndices64(UpLeftBitBoard)
     UpRight16MassIndices   = omwbits.OneIndices64(UpRightBitBoard)

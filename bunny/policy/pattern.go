@@ -18,14 +18,17 @@ func NewSymmetryFeaturesByGroupFromCanonicalIndices(canonicalIdxs []int) ([][]go
 	discsToFeature := func(discs []gothello.Disc) (gothello.Feature, error) {
 		feature := gothello.Feature{}
 		var err error
+
 		for i, disc := range discs {
 			idx := canonicalIdxs[i]
+
 			switch disc {
 			case gothello.Black:
 				feature.Self, err = omwbits.ToggleBit64(feature.Self, idx)
 			case gothello.White:
 				feature.Opponent, err = omwbits.ToggleBit64(feature.Opponent, idx)
 			}
+
 			if err != nil {
 				return gothello.Feature{}, err
 			}
@@ -42,9 +45,7 @@ func NewSymmetryFeaturesByGroupFromCanonicalIndices(canonicalIdxs []int) ([][]go
 	bases := make([]gothello.Feature, 0, len(features))
 	for _, feature := range features {
 		syms := funcs.Juxt(feature, gothello.FeatureSymmetryFuncs)
-		if omwslices.AllFunc(syms, func(f gothello.Feature) bool {
-			return !slices.Contains(bases, f)
-		}) {
+		if omwslices.AllFunc(syms, func(f gothello.Feature) bool { return !slices.Contains(bases, f) }) {
 			bases = append(bases, feature)
 		}
 	}
@@ -56,57 +57,73 @@ func NewSymmetryFeaturesByGroupFromCanonicalIndices(canonicalIdxs []int) ([][]go
 
 type PatternIndexer []map[gothello.BitBoard]map[gothello.Feature]int
 
-func NewPatternIndexerFromCanonicalIndices(canonicalMaskIdxs, canonicalEmptyMaskIdxs []int) (PatternIndexer, error) {
-	if !omwslices.IsUnique(canonicalMaskIdxs) {
-		return nil, fmt.Errorf("maskIdxs is not unique")
-	}
+func NewPatternIndexerFromCanonicalIndices(canonicalMaskIdxs, canonicalMoveIdxs []int) (PatternIndexer, error) {
+    if !omwslices.IsUnique(canonicalMaskIdxs) {
+        return nil, fmt.Errorf("maskIdxs is not unique")
+    }
+    if !omwslices.IsUnique(canonicalMoveIdxs) {
+        return nil, fmt.Errorf("moveIdxs is not unique")
+    }
+    if !omwslices.IsSubset(canonicalMaskIdxs, canonicalMoveIdxs) {
+        return nil, fmt.Errorf("maskIdxs must be a subset of moveIdxs")
+    }
 
-	if !omwslices.IsUnique(canonicalEmptyMaskIdxs) {
-		return nil, fmt.Errorf("emptyIdxs is not unique")
-	}
+    symFeaturesByGroup, err := NewSymmetryFeaturesByGroupFromCanonicalIndices(canonicalMaskIdxs)
+    if err != nil {
+        return nil, err
+    }
 
-	if !omwslices.IsSubset(canonicalMaskIdxs, canonicalEmptyMaskIdxs) {
-		return nil, fmt.Errorf("emptyMaskIdxs is not subset")
-	}
+    canonicalMask, err := omwbits.New64FromIndices[gothello.BitBoard](canonicalMaskIdxs)
+    if err != nil {
+        return nil, err
+    }
+    symMasks := funcs.Juxt(canonicalMask, gothello.BitBoardSymmetryFuncs)
 
-	symFeaturesByGroup, err := NewSymmetryFeaturesByGroupFromCanonicalIndices(canonicalMaskIdxs)
-	if err != nil {
-		return nil, err
-	}
+    indexer := make(PatternIndexer, gothello.BoardSize)
+    patternIdx := 0
 
-	canonicalMask, err := omwbits.New64FromIndices[gothello.BitBoard](canonicalMaskIdxs)
-	if err != nil {
-		return nil, err
-	}
-	symMasks := funcs.Juxt(canonicalMask, gothello.BitBoardSymmetryFuncs)
+    for _, symFeatures := range symFeaturesByGroup {
+        for symI := range gothello.FeatureSymmetryFuncs {
+            feature := symFeatures[symI]
+            mask := symMasks[symI]
+            empties := feature.Empties()
+            moves := empties&mask
+            featureMoveIdxs := omwbits.OneIndices64(moves)
 
-	emptyMaskIdxsByGroup := funcs.Map(canonicalEmptyMaskIdxs, func(idx int) []int {
-		return funcs.Juxt(idx, gothello.IndexSymmetryFuncs)
-	})
-	emptyMaskIdxTable := omwslices.Transpose(emptyMaskIdxsByGroup)
+            for _, canonicalMoveIdx := range canonicalMoveIdxs {
+                symMoveIdx := gothello.IndexSymmetryFuncs[symI](canonicalMoveIdx)
 
-	indexer := make(PatternIndexer, gothello.BoardSize)
-	for i := range indexer {
-		indexer[i] = map[gothello.BitBoard]map[gothello.Feature]int{}
-		for _, mask := range symMasks {
-			indexer[i][mask] = map[gothello.Feature]int{}
-		}
-	}
+                if slices.Contains(featureMoveIdxs, symMoveIdx) {
+                    if indexer[symMoveIdx] == nil {
+                        indexer[symMoveIdx] = map[gothello.BitBoard]map[gothello.Feature]int{}
+                    }
 
-	patternIdx := 0
-	for _, symFeatures := range symFeaturesByGroup {
-		for emptyI := 0; emptyI < len(canonicalEmptyMaskIdxs); emptyI++ {
-			for symId, feature := range symFeatures {
-				mask := symMasks[symId]
-				emptyMaskIdx := emptyMaskIdxTable[symId][emptyI]
-				empties := feature.Empties()
-				emptyIdxs := omwbits.OneIndices64(empties)
-				if slices.Contains(emptyIdxs, emptyMaskIdx) {
-					indexer[emptyMaskIdx][mask][feature] = patternIdx
-				}
+					if indexer[symMoveIdx][mask] == nil {
+						indexer[symMoveIdx][mask] = map[gothello.Feature]int{}
+					}
+
+                    if _, ok := indexer[symMoveIdx][mask][feature]; !ok {
+                        indexer[symMoveIdx][mask][feature] = patternIdx
+                    }
+                }
+            }
+        }
+        patternIdx++
+    }
+    return indexer, nil
+}
+
+func (pi PatternIndexer) MatchIndices(feature gothello.Feature, moveIdxs []int) []int {
+	var matchIdxs []int = nil
+	for _, idx := range moveIdxs {
+		indexer := pi[idx]
+		for mask, featureByIdx := range indexer {
+			masked := feature.AndBitBoard(mask)
+			patternIdx, ok := featureByIdx[masked]
+			if ok {
+				matchIdxs = append(matchIdxs, patternIdx)
 			}
-			patternIdx++
 		}
 	}
-	return indexer, nil
+	return matchIdxs
 }

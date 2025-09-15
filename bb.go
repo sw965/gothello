@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/bits"
+	"slices"
 	omwbits "github.com/sw965/omw/math/bits"
 )
 
@@ -30,13 +31,13 @@ const (
 	DownSideBitBoard  = BitBoard(0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000)
 	LeftSideBitBoard  = BitBoard(0b00000001_00000001_00000001_00000001_00000001_00000001_00000001_00000001)
 	RightSideBitBoard = BitBoard(0b10000000_10000000_10000000_10000000_10000000_10000000_10000000_10000000)
-	SideBitBoard      = UpSideBitBoard & DownSideBitBoard & LeftSideBitBoard & RightSideBitBoard
+	SideBitBoard      = UpSideBitBoard | DownSideBitBoard | LeftSideBitBoard | RightSideBitBoard
 
 	UpEdgeBitBoard    = BitBoard(0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_01111110)
 	DownEdgeBitBoard  = BitBoard(0b01111110_00000000_00000000_00000000_00000000_00000000_00000000_00000000)
 	LeftEdgeBitBoard  = BitBoard(0b00000000_00000001_00000001_00000001_00000001_00000001_00000001_00000000)
 	RightEdgeBitBoard = BitBoard(0b00000000_10000000_10000000_10000000_10000000_10000000_10000000_00000000)
-	EdgeBitBoard      = UpEdgeBitBoard & DownEdgeBitBoard & LeftEdgeBitBoard & RightEdgeBitBoard
+	EdgeBitBoard      = UpEdgeBitBoard | DownEdgeBitBoard | LeftEdgeBitBoard | RightEdgeBitBoard
 
 	CornerBitBoard = BitBoard(0b10000001_00000000_00000000_00000000_00000000_00000000_00000000_10000001)
 	CBitBoard      = BitBoard(0b01000010_10000001_00000000_00000000_00000000_00000000_10000001_01000010)
