@@ -1,11 +1,11 @@
 package policy_test
 
 import (
-	"testing"
+	"fmt"
 	"github.com/sw965/gothello"
 	"github.com/sw965/gothello/bunny/policy"
 	omwbits "github.com/sw965/omw/math/bits"
-	"fmt"
+	"testing"
 )
 
 func TestPatternIndexer(t *testing.T) {

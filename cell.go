@@ -5,14 +5,14 @@ import (
 )
 
 type Cell struct {
-	Row int
+	Row    int
 	Column string
 }
 
 func (c *Cell) ToBitBoard() BitBoard {
 	cs := []string{"a", "b", "c", "d", "e", "f", "g", "h"}
-	row := c.Row-1
+	row := c.Row - 1
 	col := slices.Index(cs, c.Column)
-	idx := RowAndColumnToIndex(row, col)
+	idx := RowColumnToIndex(row, col)
 	return 1 << idx
 }

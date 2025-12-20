@@ -4,7 +4,7 @@ import (
 	"github.com/sw965/omw/funcs"
 )
 
-var BitBoardSymmetryFuncs = []func(BitBoard) BitBoard {
+var BitBoardSymmetryFuncs = []func(BitBoard) BitBoard{
 	funcs.Identity[BitBoard],
 	BitBoard.Rotate90,
 	BitBoard.Rotate180,
@@ -18,7 +18,7 @@ var BitBoardSymmetryFuncs = []func(BitBoard) BitBoard {
 	},
 }
 
-var IndexSymmetryFuncs = []func(int) int {
+var IndexSymmetryFuncs = []func(int) int{
 	funcs.Identity[int],
 	Rotate90Index,
 	Rotate180Index,
@@ -32,7 +32,7 @@ var IndexSymmetryFuncs = []func(int) int {
 	},
 }
 
-var StateSymmetryFuncs = []func(State) State {
+var StateSymmetryFuncs = []func(State) State{
 	funcs.Identity[State],
 	State.Rotate90,
 	State.Rotate180,
@@ -46,7 +46,7 @@ var StateSymmetryFuncs = []func(State) State {
 	},
 }
 
-var FeatureSymmetryFuncs = []func(Feature) Feature {
+var FeatureSymmetryFuncs = []func(Feature) Feature{
 	funcs.Identity[Feature],
 	Feature.Rotate90,
 	Feature.Rotate180,

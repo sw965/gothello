@@ -4,6 +4,7 @@ import (
 	"fmt"
 	omwbits "github.com/sw965/omw/math/bits"
 	omwslices "github.com/sw965/omw/slices"
+	"slices"
 )
 
 type Feature struct {
@@ -27,8 +28,8 @@ func NewFeatureFromIndices(selfIdxs, oppIdxs []int) (Feature, error) {
 	}
 
 	return Feature{
-		Self:self,
-		Opponent:opp,
+		Self:     self,
+		Opponent: opp,
 	}, nil
 }
 
@@ -55,7 +56,7 @@ func (f Feature) FlipsByLegal() map[BitBoard]BitBoard {
 	return m
 }
 
-func (f Feature) Put(move BitBoard) (Feature, error) {
+func (f Feature) Move(move BitBoard) (Feature, error) {
 	flips := f.Self.Flips(f.Opponent, move)
 	if flips == 0 {
 		return Feature{}, fmt.Errorf("非合法な手を打とうとした。")
@@ -101,12 +102,12 @@ func (f Feature) Rotate270() Feature {
 	return f
 }
 
-func (f Feature) ToArray() ([][]Disc, error) {
+func (f Feature) ToArray() ([][]Perspective, error) {
 	selfArr := f.Self.ToArray()
 	oppArr := f.Opponent.ToArray()
-	arr := make([][]Disc, Rows)
+	arr := make([][]Perspective, Rows)
 	for i := range arr {
-		arr[i] = make([]Disc, Cols)
+		arr[i] = make([]Perspective, Cols)
 	}
 	for i := range arr {
 		for j := range arr[i] {
@@ -117,63 +118,112 @@ func (f Feature) ToArray() ([][]Disc, error) {
 			}
 
 			if se == 1 {
-				arr[i][j] = Black
+				arr[i][j] = Self
 			}
-			
+
 			if oe == 1 {
-				arr[i][j] = White
+				arr[i][j] = Opponent
 			}
 		}
 	}
 	return arr, nil
 }
 
-type PartialFeature1D []int
+type PartialFeature1D []Perspective
 
-func (b PartialFeature1D) Put(idx int) (PartialFeature1D, error) {
-	if b[idx] != Empty {
+func (f PartialFeature1D) Move(idx int) (PartialFeature1D, error) {
+	fn := len(f)
+	if fn <= idx {
+		return nil, fmt.Errorf("len(f) <= idx")
+	}
+
+	if f[idx] != None {
 		return nil, fmt.Errorf("空白ではない場所に置こうとした")
 	}
 
-	flipIdxs := make([]int, 0, len(b)-2)
+	flipIdxs := make([]int, 0, fn-2)
 
 	if idx > 1 {
-		candidate := make([]int, 0, idx-2)
-		for i := idx-1; i > 0; i-- {
-			switch b[i] {
-			case 0:
-				candidate = nil
-				break
-			case 1:
-				break
-			case 2:
-				candidate = append(candidate, i)
+		betweenIdxs := make([]int, 0, idx-2)
+
+	LeftScan:
+		for i := idx - 1; i > 0; i-- {
+			switch f[i] {
+			case None:
+				betweenIdxs = nil
+				break LeftScan
+			case Self:
+				break LeftScan
+			case Opponent:
+				betweenIdxs = append(betweenIdxs, i)
 			}
 		}
-		for _, flipIdx := range candidate {
-			flipIdxs = append(flipIdxs, flipIdx)
+
+		for _, betweenIdx := range betweenIdxs {
+			flipIdxs = append(flipIdxs, betweenIdx)
 		}
 	}
 
-	boardN := len(b)
-	rightFlipIdxs := make([]int, 0, len(b)-2)
-
-	if idx <= boardN-2 {
-		right = b[i+1:]
-		flips := make(PartialBoard1D, 0, len(right)-1)
-		for j := idx+1; j < boardN; j++ {
-			case 0:
-				flips = nil
-				break
-			case 1:
-				break
-			case 2:
-				flips = append(flips, j)
+	if idx <= fn-2 {
+		betweenIdxs := make([]int, 0, fn-idx-1)
+	RightScan:
+		for i := idx + 1; i < fn; i++ {
+			switch f[i] {
+			case None:
+				betweenIdxs = nil
+				break RightScan
+			case Self:
+				break RightScan
+			case Opponent:
+				betweenIdxs = append(betweenIdxs, i)
+			}
 		}
 
-		for _, flipIdx := range flips {
-			right[flipIdx] = 1
+		for _, betweenIdx := range betweenIdxs {
+			flipIdxs = append(flipIdxs, betweenIdx)
 		}
 	}
-	return nil, nil
+
+	f = slices.Clone(f)
+	f[idx] = Self
+	for _, flipIdx := range flipIdxs {
+		f[flipIdx] = Self
+	}
+	return f, nil
+}
+
+func (f PartialFeature1D) CountLeading(p Perspective) int {
+	c := 0
+	for _, e := range f {
+		if e != p {
+			return c
+		}
+		c++
+	}
+	return c
+}
+
+func (f PartialFeature1D) ToFeature(idxs []int) (Feature, error) {
+	if len(f) != len(idxs) {
+		return Feature{}, fmt.Errorf("len(f) != len(idxs)")
+	}
+
+	if !omwslices.IsUnique(idxs) {
+		return Feature{}, fmt.Errorf("idxs is not unique")
+	}
+
+	feature := Feature{}
+	for i, idx := range idxs {
+		var err error
+		switch f[i] {
+		case Self:
+			feature.Self, err = omwbits.ToggleBit64(feature.Self, idx)
+		case Opponent:
+			feature.Opponent, err = omwbits.ToggleBit64(feature.Opponent, idx)
+		}
+		if err != nil {
+			return Feature{}, err
+		}
+	}
+	return feature, nil
 }

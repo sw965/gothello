@@ -1,8 +1,8 @@
 package gothello
 
 import (
-	"slices"
 	omwbits "github.com/sw965/omw/math/bits"
+	"slices"
 )
 
 const (
@@ -13,84 +13,84 @@ const (
 )
 
 const (
-	UpLeftXIndex   = 9
-	UpRightXIndex  = 14
-	DownLeftXIndex = 49
+	UpLeftXIndex    = 9
+	UpRightXIndex   = 14
+	DownLeftXIndex  = 49
 	DownRightXIndex = 54
 )
 
 var (
-    UpLeft16MassIndices    = omwbits.OneIndices64(UpLeftBitBoard)
-    UpRight16MassIndices   = omwbits.OneIndices64(UpRightBitBoard)
-    DownLeft16MassIndices  = omwbits.OneIndices64(DownLeftBitBoard)
-    DownRight16MassIndices = omwbits.OneIndices64(DownRightBitBoard)
+	UpLeft16MassIndices    = omwbits.OneIndices64(UpLeftBitBoard)
+	UpRight16MassIndices   = omwbits.OneIndices64(UpRightBitBoard)
+	DownLeft16MassIndices  = omwbits.OneIndices64(DownLeftBitBoard)
+	DownRight16MassIndices = omwbits.OneIndices64(DownRightBitBoard)
 
-    WhiteLineIndices = omwbits.OneIndices64(WhiteLineBitBoard)
-    BlackLineIndices = omwbits.OneIndices64(BlackLineBitBoard)
+	WhiteLineIndices = omwbits.OneIndices64(WhiteLineBitBoard)
+	BlackLineIndices = omwbits.OneIndices64(BlackLineBitBoard)
 
-    UpSideIndices   = omwbits.OneIndices64(UpSideBitBoard)
-    DownSideIndices = omwbits.OneIndices64(DownSideBitBoard)
-    LeftSideIndices  = omwbits.OneIndices64(LeftSideBitBoard)
-    RightSideIndices = omwbits.OneIndices64(RightSideBitBoard)
+	UpSideIndices    = omwbits.OneIndices64(UpSideBitBoard)
+	DownSideIndices  = omwbits.OneIndices64(DownSideBitBoard)
+	LeftSideIndices  = omwbits.OneIndices64(LeftSideBitBoard)
+	RightSideIndices = omwbits.OneIndices64(RightSideBitBoard)
 
-    UpEdgeIndices    = omwbits.OneIndices64(UpEdgeBitBoard)
-    DownEdgeIndices  = omwbits.OneIndices64(DownEdgeBitBoard)
-    LeftEdgeIndices  = omwbits.OneIndices64(LeftEdgeBitBoard)
-    RightEdgeIndices = omwbits.OneIndices64(RightEdgeBitBoard)
-    EdgeIndices      = omwbits.OneIndices64(EdgeBitBoard)
+	UpEdgeIndices    = omwbits.OneIndices64(UpEdgeBitBoard)
+	DownEdgeIndices  = omwbits.OneIndices64(DownEdgeBitBoard)
+	LeftEdgeIndices  = omwbits.OneIndices64(LeftEdgeBitBoard)
+	RightEdgeIndices = omwbits.OneIndices64(RightEdgeBitBoard)
+	EdgeIndices      = omwbits.OneIndices64(EdgeBitBoard)
 
-    CornerIndices = omwbits.OneIndices64(CornerBitBoard)
-    CIndices      = omwbits.OneIndices64(CBitBoard)
-    AIndices      = omwbits.OneIndices64(ABitBoard)
-    BIndices      = omwbits.OneIndices64(BBitBoard)
-    XIndices      = omwbits.OneIndices64(XBitBoard)
+	CornerIndices = omwbits.OneIndices64(CornerBitBoard)
+	CIndices      = omwbits.OneIndices64(CBitBoard)
+	AIndices      = omwbits.OneIndices64(ABitBoard)
+	BIndices      = omwbits.OneIndices64(BBitBoard)
+	XIndices      = omwbits.OneIndices64(XBitBoard)
 )
 
 func IsCornerIndex(idx int) bool {
 	return slices.Contains(CornerIndices, idx)
 }
 
-func IndexToRowAndColumn(idx int) (int, int) {
-	return idx/Cols, idx%Cols
+func IndexToRowColumn(idx int) (int, int) {
+	return idx / Cols, idx % Cols
 }
 
-func RowAndColumnToIndex(row, col int) int {
-	return row * Cols + col
+func RowColumnToIndex(row, col int) int {
+	return row*Cols + col
 }
 
 func TransposeIndex(idx int) int {
-    row, col := idx/Cols, idx%Cols
-    return col*Cols + row
+	row, col := idx/Cols, idx%Cols
+	return col*Cols + row
 }
 
 func MirrorHorizontalIndex(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
+	row, col := IndexToRowColumn(idx)
 	newCol := (Cols - 1) - col
 	return row*Cols + newCol
 }
 
 func MirrorVerticalIndex(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
+	row, col := IndexToRowColumn(idx)
 	newRow := (Rows - 1) - row
 	return newRow*Cols + col
 }
 
 func Rotate90Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
+	row, col := IndexToRowColumn(idx)
 	newRow := col
 	newCol := (Rows - 1) - row
 	return newRow*Cols + newCol
 }
 
 func Rotate180Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
+	row, col := IndexToRowColumn(idx)
 	newRow := (Rows - 1) - row
 	newCol := (Cols - 1) - col
 	return newRow*Cols + newCol
 }
 
 func Rotate270Index(idx int) int {
-	row, col := IndexToRowAndColumn(idx)
+	row, col := IndexToRowColumn(idx)
 	newRow := (Cols - 1) - col
 	newCol := row
 	return newRow*Cols + newCol

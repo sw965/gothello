@@ -2,10 +2,9 @@ package gothello
 
 import (
 	"fmt"
+	omwbits "github.com/sw965/omw/math/bits"
 	"math"
 	"math/bits"
-	"slices"
-	omwbits "github.com/sw965/omw/math/bits"
 )
 
 type BitBoard uint64
@@ -61,7 +60,7 @@ var AdjacentBySingle = func() map[BitBoard]BitBoard {
 	for i := 0; i < BoardSize; i++ {
 		single := BitBoard(1) << i
 		var adj BitBoard = 0
-		row, col := IndexToRowAndColumn(i)
+		row, col := IndexToRowColumn(i)
 
 		// 右端でなければ右方向へ
 		if col < Cols-1 {
@@ -101,14 +100,14 @@ var AdjacentBySingle = func() map[BitBoard]BitBoard {
 }()
 
 func (bb BitBoard) ToggleBit(idx int) (BitBoard, error) {
-	max := BoardSize-1
+	max := BoardSize - 1
 	if idx < 0 || idx > max {
 		return 0, fmt.Errorf("idxは0から%dでなければならない。", max)
 	}
 	return bb ^ (1 << idx), nil
 }
 
-//転置行列
+// 転置行列
 func (bb BitBoard) Transpose() BitBoard {
 	var t BitBoard
 	t = (bb ^ (bb >> 7)) & 0b00000000_10101010_00000000_10101010_00000000_10101010_00000000_10101010
@@ -120,7 +119,7 @@ func (bb BitBoard) Transpose() BitBoard {
 	return bb
 }
 
-//横回転
+// 横回転
 func (bb BitBoard) MirrorHorizontal() BitBoard {
 	bb = ((bb & 0b11110000_11110000_11110000_11110000_11110000_11110000_11110000_11110000) >> 4) |
 		((bb & 0b00001111_00001111_00001111_00001111_00001111_00001111_00001111_00001111) << 4)
@@ -131,7 +130,7 @@ func (bb BitBoard) MirrorHorizontal() BitBoard {
 	return bb
 }
 
-//縦回転
+// 縦回転
 func (bb BitBoard) MirrorVertical() BitBoard {
 	return ((bb & 0b11111111_00000000_00000000_00000000_00000000_00000000_00000000_00000000) >> 56) |
 		((bb & 0b00000000_11111111_00000000_00000000_00000000_00000000_00000000_00000000) >> 40) |
@@ -160,11 +159,11 @@ func (bb BitBoard) Rotate270() BitBoard {
 }
 
 /*
-	https://blog.qmainconts.dev/articles/yxiplk2_dd
-	https://qiita.com/sensuikan1973/items/459b3e11d91f3cb37e43
-	上記の参考文献では、最上位ビットを(0, 0)の地点と見なしているが、
-	このライブラリでは、(0, 0)の地点を最下位ビットと見なしている為、
-	左シフトと右シフトの役割が逆になっている。
+https://blog.qmainconts.dev/articles/yxiplk2_dd
+https://qiita.com/sensuikan1973/items/459b3e11d91f3cb37e43
+上記の参考文献では、最上位ビットを(0, 0)の地点と見なしているが、
+このライブラリでは、(0, 0)の地点を最下位ビットと見なしている為、
+左シフトと右シフトの役割が逆になっている。
 */
 func (bb BitBoard) Legals(opp BitBoard) BitBoard {
 	/*
@@ -292,11 +291,11 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 	occupied := bb | opp
 
 	//既に石が置かれている場合
-	if (occupied&move) != 0 {
+	if (occupied & move) != 0 {
 		return 0
 	}
 
-	shifts := []func(BitBoard) BitBoard {
+	shifts := []func(BitBoard) BitBoard{
 		ShiftRight, ShiftLeft, ShiftUp, ShiftDown,
 		ShiftUpRight, ShiftUpLeft, ShiftDownRight, ShiftDownLeft,
 	}
@@ -314,7 +313,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 			 [1 1 1 1 1 1 1 0]]
 		*/
 		0b01111111_01111111_01111111_01111111_01111111_01111111_01111111_01111111,
-		
+
 		/*
 			左方向のマスク
 			[[0 1 1 1 1 1 1 1]
@@ -327,7 +326,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 			 [0 1 1 1 1 1 1 1]]
 		*/
 		0b11111110_11111110_11111110_11111110_11111110_11111110_11111110_11111110,
-		
+
 		/*
 			上方向のマスク
 			[[0 0 0 0 0 0 0 0]
@@ -340,7 +339,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 			 [1 1 1 1 1 1 1 1]]
 		*/
 		0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_00000000,
-		
+
 		/*
 			下方向のマスク
 			[[1 1 1 1 1 1 1 1]
@@ -353,7 +352,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 			 [0 0 0 0 0 0 0 0]]
 		*/
 		0b00000000_11111111_11111111_11111111_11111111_11111111_11111111_11111111,
-		
+
 		/*
 			右上方向のマスク
 			[[0 0 0 0 0 0 0 0]
@@ -366,7 +365,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 			 [1 1 1 1 1 1 1 0]]
 		*/
 		0b01111111_01111111_01111111_01111111_01111111_01111111_01111111_00000000,
-		
+
 		/*
 			左上方向のマスク
 			[[0 0 0 0 0 0 0 0]
@@ -379,7 +378,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 			 [0 1 1 1 1 1 1 1]]
 		*/
 		0b11111110_11111110_11111110_11111110_11111110_11111110_11111110_00000000,
-		
+
 		/*
 			右下方向のマスク
 			[[1 1 1 1 1 1 1 0]
@@ -392,7 +391,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 			 [0 0 0 0 0 0 0 0]]
 		*/
 		0b00000000_01111111_01111111_01111111_01111111_01111111_01111111_01111111,
-		
+
 		/*
 			左下方向のマスク
 			[[0 1 1 1 1 1 1 1]
@@ -414,16 +413,16 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 		//置く石の座標からスタートして、ある方向に1つ進む
 		currentRaw := shift(move)
 		currentMasked := currentRaw & mask
-		var candidate BitBoard
-		
-		for currentMasked != 0 && (currentMasked & opp) != 0 {
-			candidate |= currentMasked
+		var between BitBoard
+
+		for currentMasked != 0 && (currentMasked&opp) != 0 {
+			between |= currentMasked
 			currentRaw = shift(currentRaw)
 			currentMasked = currentRaw & mask
 		}
 
 		if (currentRaw & bb) != 0 {
-			flips |= candidate
+			flips |= between
 		}
 	}
 	return flips
@@ -432,7 +431,7 @@ func (bb BitBoard) Flips(opp, move BitBoard) BitBoard {
 func (bb BitBoard) ToArray() [Rows][Cols]int {
 	var arr [Rows][Cols]int
 	for i := 0; i < BoardSize; i++ {
-		row, col := IndexToRowAndColumn(i)
+		row, col := IndexToRowColumn(i)
 		if bb&(1<<i) != 0 {
 			arr[row][col] = 1
 		} else {

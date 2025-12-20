@@ -1,21 +1,22 @@
 package gothello_test
 
 import (
-	"testing"
+	"fmt"
 	"github.com/sw965/gothello"
+	"testing"
 )
 
 func Test(t *testing.T) {
-	partialBoard1d := gothello.PartialBoard1D{
-		gothello.Black,
-		gothello.Black,
-		gothello.White,
-		gothello.Empty,
-		gothello.White,
-		gothello.Black,
-		gothello.White,
-		gothello.Empty,
+	partialBoard1d := gothello.PartialFeature1D{
+		0,
+		2,
+		2,
+		1,
+		2,
+		1,
+		2,
+		0,
 	}
 
-	partialBoard1d.Put()
+	fmt.Println(partialBoard1d.Move(0))
 }
