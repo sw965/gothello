@@ -4,15 +4,20 @@ import (
 	"slices"
 )
 
+var CellCols = []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+
 type Cell struct {
 	Row    int
-	Column string
+	Col    string
 }
 
-func (c *Cell) ToBitBoard() BitBoard {
-	cs := []string{"a", "b", "c", "d", "e", "f", "g", "h"}
+func (c Cell) ToIndex() int {
 	row := c.Row - 1
-	col := slices.Index(cs, c.Column)
-	idx := RowColumnToIndex(row, col)
+	col := slices.Index(CellCols, c.Col)
+	return (row*8) + col
+}
+
+func (c Cell) ToBitBoard() BitBoard {
+	idx := c.ToIndex() 
 	return 1 << idx
 }

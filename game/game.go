@@ -1,63 +1,57 @@
 package game
 
 import (
+	"github.com/sw965/omw/mathx/bitsx"
 	"github.com/sw965/gothello"
 	game "github.com/sw965/crow/game/sequential"
 )
 
-func NewLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Disc] {
-	legalActionsProvider := func(state gothello.State) []gothello.BitBoard {
-		return state.LegalBitBoard().ToSingles()
+func NewGameLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Turn] {
+	return game.Logic[gothello.State, gothello.BitBoard, gothello.Turn]{
+		LegalMovesFunc:func(state gothello.State) []gothello.BitBoard {
+			legals := state.Legals()
+			return bitsx.Singles(legals)
+		},
+		MoveFunc:gothello.State.Move,
+		EqualFunc:func(s1, s2 gothello.State) bool {
+			return s1 == s2
+		},
+		CurrentAgentFunc:gothello.State.Turn,
 	}
+}
 
-	transitioner := func(state gothello.State, move gothello.BitBoard) (gothello.State, error) {
-		return state.Put(move)
-	}
+func NewGameEngine() game.Engine[gothello.State, gothello.BitBoard, gothello.Turn]{
+	e := game.Engine[gothello.State, gothello.BitBoard, gothello.Turn]{
+		Logic:NewGameLogic(),
+		RankByAgentFunc:func(state gothello.State) (game.RankByAgent[gothello.Turn], error) {
+			blackLegalCount := state.Blacks.Legals(state.Whites)
+			whiteLegalCount := state.Whites.Legals(state.Blacks)
+			if blackLegalCount != 0 || whiteLegalCount != 0 {
+				return nil, nil
+			}
 
-	comparator := func(s1, s2 gothello.State) bool {
-		return s1 == s2
-	}
-
-	currentAgentGetter := func(state gothello.State) gothello.Disc {
-		return state.Turn
-	}
-
-	placementsJudger := func(state gothello.State) (game.PlacementByAgent[gothello.Disc], error) {
-		blackLegal := state.Black.LegalBitBoard(state.White)
-		whiteLegal := state.White.LegalBitBoard(state.Black)
-
-		//ゲームが終了している場合
-		if blackLegal == 0 && whiteLegal == 0 {
-			blackCount := state.Black.OnesCount()
-			whiteCount := state.White.OnesCount()
-			placements := game.PlacementByAgent[gothello.Disc]{}
+			blackCount := state.Blacks.OnesCount()
+			whiteCount := state.Whites.OnesCount()
+			var blackRank int
+			var whiteRank int
 
 			if blackCount > whiteCount {
-				placements[gothello.Black] = 1
-				placements[gothello.White] = 2
+				blackRank = 1
+				whiteRank = 2
 			} else if blackCount < whiteCount {
-				placements[gothello.Black] = 2
-				placements[gothello.White] = 1
+				blackRank = 2
+				whiteRank = 1
 			} else {
-				placements[gothello.Black] = 1
-				placements[gothello.White] = 1
+				blackRank = 1
+				whiteRank = 1
 			}
-			return placements, nil
-		}
-
-		//まだゲームが終了していない場合
-		return nil, nil
+			return game.RankByAgent[gothello.Turn]{
+				gothello.BlackTurn:blackRank,
+				gothello.WhiteTurn:whiteRank,
+			}, nil
+		},
+		Agents:[]gothello.Turn{gothello.BlackTurn, gothello.WhiteTurn},
 	}
-
-	logic := game.Logic[gothello.State, gothello.BitBoard, gothello.Disc]{
-		LegalActionsProvider:legalActionsProvider,
-		Transitioner:transitioner,
-		Comparator:comparator,
-		CurrentAgentGetter:currentAgentGetter,
-		PlacementsJudger:placementsJudger,
-		Agents:[]gothello.Disc{gothello.Black, gothello.White},
-	}
-
-	logic.SetStandardResultScoresEvaluator()
-	return logic
+	e.SetStandardResultScoreByAgentFunc()
+	return e
 }
