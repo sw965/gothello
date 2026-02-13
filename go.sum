@@ -1,4 +1,4 @@
-github.com/sw965/crow v0.0.0-20251223125500-fbb934f01493 h1:LqjwVNz0FcLGiv+FopDROzBecHhM/U9kU0ExHE5ZGrY=
-github.com/sw965/crow v0.0.0-20251223125500-fbb934f01493/go.mod h1:KuIE/VX5+VQtY7/oFdW/8eEg2ZR1bj8f2l1THdGaKNY=
-github.com/sw965/omw v0.0.0-20251220024920-1da4f0424b97 h1:sNuiT4Y/WsXWCfBkk3LhUgbGDHFiHAXPg9Y1tYAdJi0=
-github.com/sw965/omw v0.0.0-20251220024920-1da4f0424b97/go.mod h1:EKL8/ZktcbPtKvT26wyO6DGxpgfe8XTcw1YzA2RRyz0=
+github.com/sw965/crow v0.1.0-test.0.20260213181008-7594c0c4e3d3 h1:Hf4JGpQAFSgehKkqAvpLCSk9P31A1yClD+BzTRhm0W0=
+github.com/sw965/crow v0.1.0-test.0.20260213181008-7594c0c4e3d3/go.mod h1:frgp1Xvac/dlyjJR12JElnditlvGVCV/7WYjE67IES4=
+github.com/sw965/omw v0.0.0-20260212154354-3ca55cd51ee6 h1:1TPDsjYfp6TwkIe0eyhuU8xZbLjZmHNQ0A+iaEyhLFs=
+github.com/sw965/omw v0.0.0-20260212154354-3ca55cd51ee6/go.mod h1:6sxDC1FbUj7Am/WJkeefmNhGdhVNoXjSLgdraR67R5U=

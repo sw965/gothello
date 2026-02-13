@@ -6,7 +6,7 @@ import (
 	game "github.com/sw965/crow/game/sequential"
 )
 
-func NewGameLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Turn] {
+func NewLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Turn] {
 	return game.Logic[gothello.State, gothello.BitBoard, gothello.Turn]{
 		LegalMovesFunc:func(state gothello.State) []gothello.BitBoard {
 			legals := state.Legals()
@@ -20,9 +20,9 @@ func NewGameLogic() game.Logic[gothello.State, gothello.BitBoard, gothello.Turn]
 	}
 }
 
-func NewGameEngine() game.Engine[gothello.State, gothello.BitBoard, gothello.Turn]{
+func NewEngine() game.Engine[gothello.State, gothello.BitBoard, gothello.Turn]{
 	e := game.Engine[gothello.State, gothello.BitBoard, gothello.Turn]{
-		Logic:NewGameLogic(),
+		Logic:NewLogic(),
 		RankByAgentFunc:func(state gothello.State) (game.RankByAgent[gothello.Turn], error) {
 			blackLegalCount := state.Blacks.Legals(state.Whites)
 			whiteLegalCount := state.Whites.Legals(state.Blacks)
